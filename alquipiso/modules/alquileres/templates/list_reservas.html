@@ -1,0 +1,21 @@
+<!-- templates/list_reservas.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Reservas</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1>Reservas</h1>
+        <ul class="list-group">
+            {% for reserva in reservas %}
+                <li class="list-group-item">
+                    <a href="{% url 'alquileres:show_reserva' reserva.id %}">Reserva #{{ reserva.id }} - {{ reserva.fecha_entrada }} al {{ reserva.fecha_salida }}</a>
+                    <p>Alojamiento: {{ reserva.alojamiento.nombre }}</p>
+                    <p>Cliente: {{ reserva.cliente.nombre }} {{ reserva.cliente.apellido }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock content %}

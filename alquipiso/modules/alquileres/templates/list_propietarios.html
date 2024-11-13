@@ -1,0 +1,19 @@
+<!-- templates/list_propietarios.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Propietarios</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1>Propietarios</h1>
+        <ul class="list-group">
+            {% for propietario in propietarios %}
+                <li class="list-group-item">
+                    <a href="{% url 'alquileres:show_propietario' propietario.id %}">{{ propietario.nombre }} {{ propietario.apellido }}</a> - {{ propietario.telefono }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock content %}

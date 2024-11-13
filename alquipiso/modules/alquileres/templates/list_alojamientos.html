@@ -1,0 +1,30 @@
+<!-- templates/list_alojamientos.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Lista de Alojamientos</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1>Alojamientos</h1>
+
+        {% if user.is_authenticated %}
+            {% if user.propietario %}
+                <!-- Mostrar botón para añadir alojamiento solo si es propietario -->
+                <a href="{% url 'alquileres:create_alojamiento' %}" class="btn btn-success mb-3">Añadir Alojamiento</a>
+            {% endif %}
+        {% endif %}
+
+        <ul class="list-group">
+            {% for alojamiento in alojamientos %}
+                <div>
+                    <h3>{{ alojamiento.nombre }}</h3>
+                    <p>{{ alojamiento.descripcion }}</p>
+                    <!-- Link to the show_alojamiento view, passing the alojamiento's ID -->
+                    <a href="{% url 'alquileres:show_alojamiento' alojamiento_id=alojamiento.id %}">Ver Detalles</a>
+                </div>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock content %}

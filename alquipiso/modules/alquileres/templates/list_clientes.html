@@ -1,0 +1,19 @@
+<!-- templates/list_clientes.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Clientes</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1>Clientes</h1>
+        <ul class="list-group">
+            {% for cliente in clientes %}
+                <li class="list-group-item">
+                    <a href="{% url 'alquileres:show_cliente' cliente.id %}">{{ cliente.nombre }} {{ cliente.apellido }}</a> - {{ cliente.telefono }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock content %}

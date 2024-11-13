@@ -1,0 +1,18 @@
+<!-- templates/show_alojamiento.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>{{ alojamiento.nombre }}</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1>{{ alojamiento.nombre }}</h1>
+        <p><strong>Dirección:</strong> {{ alojamiento.direccion }}</p>
+        <p><strong>Descripción:</strong> {{ alojamiento.descripcion }}</p>
+        <p><strong>Precio:</strong> ${{ alojamiento.precio }}</p>
+        {% if alojamiento.imagen %}
+            <img src="{{ alojamiento.imagen.url }}" class="img-fluid" alt="Imagen de {{ alojamiento.nombre }}">
+        {% endif %}
+    </div>
+{% endblock content %}

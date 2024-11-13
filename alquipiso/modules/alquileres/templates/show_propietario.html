@@ -1,0 +1,14 @@
+<!-- templates/show_propietario.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>{{ propietario.nombre }} {{ propietario.apellido }}</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1>{{ propietario.nombre }} {{ propietario.apellido }}</h1>
+        <p><strong>Teléfono:</strong> {{ propietario.telefono }}</p>
+        <p><strong>Email:</strong> {{ propietario.email }}</p>
+    </div>
+{% endblock content %}

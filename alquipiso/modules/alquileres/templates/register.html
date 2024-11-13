@@ -1,0 +1,19 @@
+<!-- modules/alquileres/templates/register.html -->
+{% extends 'base.html' %}
+
+{% if messages %}
+    <div class="alert alert-danger">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% block content %}
+  <h2>Registro</h2>
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Registrar</button>
+  </form>
+{% endblock %}
