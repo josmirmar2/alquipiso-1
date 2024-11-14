@@ -1,19 +1,111 @@
-<!-- modules/alquileres/templates/register.html -->
 {% extends 'base.html' %}
 
-{% if messages %}
-    <div class="alert alert-danger">
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    </div>
-{% endif %}
+{% block title %}
+    <title>Registro - Alquipiso</title>
+{% endblock title %}
+
+{% block extra_css %}
+    <style>
+        /* Estilos generales */
+        body {
+            background-color: #f8f9fa;  /* Fondo gris claro para todo el cuerpo */
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Centrar el contenedor del formulario */
+        .register-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;  /* Asegura que el contenedor ocupe toda la altura de la pantalla */
+            padding: 0 20px;  /* Espacio lateral */
+        }
+
+        /* Estilo para la tarjeta del formulario */
+        .register-card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;  /* Controla el ancho máximo del formulario */
+            margin: 0 auto;  /* Asegura que la tarjeta esté centrada */
+        }
+
+        .register-card h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Estilos para los campos del formulario */
+        .form-control {
+            border-radius: 8px;
+            height: 45px;
+            font-size: 16px;
+            padding: 10px;  /* Agregar espacio interno a los inputs */
+            width: 100%;  /* Asegura que los inputs no se expandan más allá del contenedor */
+            margin-bottom: 20px;  /* Espacio entre los campos */
+        }
+
+        /* Estilo para el botón de enviar */
+        .btn-primary {
+            width: 100%;
+            height: 45px;
+            font-size: 16px;
+            border-radius: 8px;
+        }
+
+        /* Mensaje de error */
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;  /* Espacio debajo del mensaje de error */
+        }
+
+        /* Estilo para el enlace de login */
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+{% endblock extra_css %}
 
 {% block content %}
-  <h2>Registro</h2>
-  <form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Registrar</button>
-  </form>
-{% endblock %}
+    <div class="register-container">
+        <div class="register-card">
+            <h2>Registro</h2>
+
+            <!-- Mostrar los mensajes de error si existen -->
+            {% if messages %}
+                <div class="alert alert-danger">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Formulario de registro -->
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Registrar</button>
+            </form>
+
+            <!-- Enlace para loguearse si ya tienen cuenta -->
+            <div class="login-link">
+                <p>¿Tienes cuenta? <a href="{% url 'alquileres:login' %}">Inicia sesión aquí</a></p>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

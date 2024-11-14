@@ -10,9 +10,12 @@
         <h1>Reserva #{{ reserva.id }}</h1>
         <p><strong>Fecha de Entrada:</strong> {{ reserva.fecha_entrada }}</p>
         <p><strong>Fecha de Salida:</strong> {{ reserva.fecha_salida }}</p>
-        <p><strong>Cliente:</strong> {{ reserva.cliente.nombre }} {{ reserva.cliente.apellido }}</p>
         <p><strong>Alojamiento:</strong> {{ reserva.alojamiento.nombre }}</p>
         <p><strong>Precio Total:</strong> ${{ reserva.precio_total }}</p>
-        <p><strong>Estado:</strong> {% if reserva.pagado %}Pagado{% else %}No pagado{% endif %}</p>
+
+        {% if not reserva.pagado %}
+            <!-- Botón para redirigir a la pasarela de pago -->
+            <a href="{% url 'alquileres:pago_reserva' reserva.id %}" class="btn btn-primary mt-3">Pagar ahora</a>
+        {% endif %}
     </div>
 {% endblock content %}

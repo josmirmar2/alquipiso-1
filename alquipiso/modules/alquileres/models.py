@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from PIL import Image
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -7,10 +9,26 @@ class Alojamiento(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     direccion = models.CharField(max_length=100)
+    ciudad = models.CharField(max_length=100)
     descripcion = models.TextField()
     precio = models.FloatField()
     imagen = models.ImageField(upload_to='media', null=True, blank=True)
     propietario = models.ForeignKey('Propietario', on_delete=models.CASCADE, related_name='alojamientos')
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Redimensionar la imagen
+        if self.imagen:
+            img_path = self.imagen.path
+            img = Image.open(img_path)
+
+            # Establecer el tamaño deseado (por ejemplo, 300x300 píxeles)
+            max_size = (300, 300)
+            img.thumbnail(max_size, Image.ANTIALIAS)
+
+            # Guardar la imagen redimensionada
+            img.save(img_path)
     
 class Cliente(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, default=1)
@@ -29,6 +47,20 @@ class Reserva(models.Model):
     fecha_reserva = models.DateField()
     precio_total = models.FloatField()
     pagado = models.BooleanField()
+
+    def calcular_precio_total(self):
+        # Calcular la duración de la estancia (en días)
+        if self.fecha_entrada and self.fecha_salida:
+            duracion = (self.fecha_salida - self.fecha_entrada).days
+            if duracion > 0:
+                return duracion * self.alojamiento.precio
+        return 0
+
+    def clean(self):
+        # Validación para asegurarse de que la fecha de salida sea después de la fecha de entrada
+        if self.fecha_salida < self.fecha_entrada:
+            raise ValidationError('La fecha de salida no puede ser anterior a la fecha de entrada.')
+
 
     def __str__(self):
         return f"Reserva de {self.cliente.user.username} para {self.alojamiento.nombre}"

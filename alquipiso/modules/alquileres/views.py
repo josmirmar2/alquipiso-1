@@ -1,18 +1,24 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from .forms import AlojamientoForm, UserRegistrationForm
+from .forms import AlojamientoForm, UserRegistrationForm, ReservaForm
 from .models import Cliente, Propietario
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
 from modules.alquileres.models import *
 
 # Create your views here.
 
 def index(request):
-    return render(request, 'index.html', {'welcome_text': 'Welcome to AlquiPiso!'})
+    alojamientos = Alojamiento.objects.all()  # Obtén todos los alojamientos de la base de datos
+    welcome_text = "Encuentra tu próximo destino con AlquiPiso"
+    return render(request, 'index.html', {
+        'alojamientos': alojamientos,
+        'welcome_text': welcome_text,
+    })
 
 def list_alojamientos(request):
     alojamientos = Alojamiento.objects.all()
@@ -34,7 +40,7 @@ def list_alojamientos_propietario(request, propietario_id):
 
 def list_propietarios(request):
     propietarios = Propietario.objects.all()
-    return render(request, 'propietarios.html', {'propietarios': propietarios})
+    return render(request, 'list_propietarios.html', {'propietarios': propietarios})
 
 def show_propietario(request, propietario_id):
     propietario = Propietario.objects.get(pk=propietario_id)
@@ -106,19 +112,31 @@ def register(request):
     return render(request, 'register.html', {'form': form})
 
 def login_view(request):
+    if request.user.is_authenticated:
+        # Si el usuario ya está autenticado, redirigirlo a la página de inicio
+        return redirect('alquileres:index')
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        # Authenticate the user
+        
+        # Verifica que los campos no estén vacíos
+        if not username or not password:
+            messages.error(request, 'Por favor ingresa tanto el nombre de usuario como la contraseña.')
+            return redirect('alquileres:login')
+
+        # Autenticar al usuario
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
-            # Log the user in
-            login(request, user)  # Correct way to call login
-            return redirect('alquileres:index')  # Redirect to the home page or desired page
+            # Si la autenticación es exitosa, iniciar sesión y redirigir
+            login(request, user)
+            return redirect('alquileres:index')  # Redirige a la página principal
         else:
-            # Show error message if authentication fails
-            messages.error(request, 'Invalid login credentials.')
+            # Si la autenticación falla, mostrar mensaje de error
+            messages.error(request, 'Credenciales inválidas. Intenta de nuevo.')
+    
+    # Si no es una solicitud POST, simplemente muestra la página de login
     return render(request, 'login.html')
 
 def logout_view(request):
@@ -143,3 +161,37 @@ def create_alojamiento(request):
         form = AlojamientoForm()
 
     return render(request, 'create_alojamiento.html', {'form': form})
+
+def create_reserva(request, alojamiento_id):
+    # Obtener el alojamiento de la base de datos
+    alojamiento = get_object_or_404(Alojamiento, id=alojamiento_id)
+    
+    if request.method == 'POST':
+        form = ReservaForm(request.POST)
+        if form.is_valid():
+            # Crear la reserva
+            reserva = form.save(commit=False)
+            reserva.alojamiento = alojamiento  # Asignar el alojamiento a la reserva
+            reserva.cliente = request.user.cliente # Asignar el cliente actual a la reserva
+            reserva.precio_total = reserva.calcular_precio_total()  # Calcular el precio total
+            reserva.fecha_reserva = timezone.now()
+            reserva.save()
+            return redirect('alquileres:pago_reserva', reserva_id=reserva.id)  # Redirigir después de guardar
+    else:
+        form = ReservaForm()
+
+    return render(request, 'create_reserva.html', {'form': form, 'alojamiento': alojamiento, 'precio': alojamiento.precio})
+
+@login_required
+def pago_reserva(request, reserva_id):
+    reserva = get_object_or_404(Reserva, id=reserva_id, cliente=request.user.cliente)
+    
+    if request.method == 'POST':
+        # Aquí se procesaría el pago ficticio. Si es exitoso:
+        reserva.pagado = True
+        reserva.save()
+        # Redirigir a una página de confirmación o al índice
+        return redirect('alquileres:list_reservas_cliente', cliente_id=request.user.cliente.id)
+    
+    # Renderizamos el formulario de pago
+    return render(request, 'pago_reserva.html', {'reserva': reserva})

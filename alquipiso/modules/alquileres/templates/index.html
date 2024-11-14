@@ -1,13 +1,107 @@
-<!-- templates/index.html -->
 {% extends 'base.html' %}
 
 {% block title %}
-    <title>Inicio - AlquiPiso</title>
+<title>Inicio - AlquiPiso</title>
 {% endblock title %}
 
+{% block extra_css %}
+<style>
+    .card-deck {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        justify-content: center;
+    }
+
+    .card {
+        width: 18rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+
+    .card:hover {
+        transform: scale(1.03);
+    }
+
+    .card-img-top {
+        width: 80%;
+        /* La imagen ocupará el 80% del ancho de la tarjeta */
+        height: 150px;
+        /* Ajusta la altura de la imagen */
+        object-fit: cover;
+        border-radius: 8px;
+        margin: 0 auto;
+        /* Centra la imagen horizontalmente */
+        display: block;
+    }
+
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .card-text {
+        color: #555;
+    }
+
+    .btn-reserve {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .btn-reserve:hover {
+        background-color: #0056b3;
+        color: #fff;
+    }
+</style>
+{% endblock extra_css %}
+
 {% block content %}
-    <div class="container mt-5">
-        <h1>{{ welcome_text }}</h1>
-        <p>Bienvenido a nuestra plataforma de gestión de alquileres.</p>
+<div class="container mt-5">
+    <h1>{{ welcome_text }}</h1>
+    <p>Bienvenido a nuestra plataforma de gestión de alquileres.</p>
+
+    <div class="card-deck">
+        {% for alojamiento in alojamientos %}
+        <div class="card">
+            <!-- Imagen del alojamiento -->
+            <img src="{{ alojamiento.imagen.url }}" alt="Imagen de {{ alojamiento.nombre }}" class="card-img-top">
+
+            <div class="card-body">
+                <!-- Nombre del alojamiento -->
+                <h5 class="card-title">{{ alojamiento.nombre }}</h5>
+
+                <!-- Dirección y ciudad -->
+                <p class="card-text">{{ alojamiento.direccion }}, {{ alojamiento.ciudad }}</p>
+
+                <!-- Precio por noche -->
+                <p class="card-text"><strong>Precio por noche:</strong> ${{ alojamiento.precio }}</p>
+
+                <!-- Botón de reserva -->
+                <a href="{% if user.is_authenticated %}{% url 'alquileres:create_reserva' alojamiento.id %}{% else %}{% url 'alquileres:login' %}{% endif %}"
+                    class="btn-reserve">
+                    Reservar
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <p>No hay alojamientos disponibles en este momento.</p>
+        {% endfor %}
     </div>
+</div>
 {% endblock content %}

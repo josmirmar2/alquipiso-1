@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Pago de Reserva</title>
+{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Pago de la Reserva</h2>
+    <p>Alojamiento: {{ reserva.alojamiento.nombre }}</p>
+    <p>Precio Total: {{ reserva.precio_total }} €</p>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label for="card_number" class="form-label">Número de tarjeta</label>
+            <input type="text" class="form-control" id="card_number" name="card_number" 
+                pattern="\d{13,19}" title="Debe contener entre 13 y 19 dígitos" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="expiry_date" class="form-label">Fecha de caducidad</label>
+            <input type="text" class="form-control" id="expiry_date" name="expiry_date" placeholder="MM/YY" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="cvv" class="form-label">CVV</label>
+            <input type="text" class="form-control" id="cvv" name="cvv" 
+                pattern="\d{3,4}" title="Debe contener 3 o 4 dígitos" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Pagar</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('expiry_date').addEventListener('input', function() {
+        const value = this.value;
+        const currentYear = new Date().getFullYear() % 100; // Get last two digits of the current year
+        const currentMonth = new Date().getMonth() + 1;
+
+        if (/^(0[1-9]|1[0-2])\/\d{2}$/.test(value)) { // Checks for MM/YY format
+            const [month, year] = value.split('/').map(Number);
+            if (year < currentYear || (year === currentYear && month < currentMonth)) {
+                this.setCustomValidity('La tarjeta ha caducado');
+            } else {
+                this.setCustomValidity(''); // Valid
+            }
+        } else {
+            this.setCustomValidity('Formato inválido. Utilice MM/YY');
+        }
+    });
+</script>
+{% endblock content %}

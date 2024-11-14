@@ -31,9 +31,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto"> <!-- 'ms-auto' class for right-aligned items -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'index' %}">Home</a>
-                    </li>
 
                     {% if user.is_authenticated %}
                     {% if user.propietario %} <!-- Check if user has a related Propietario -->
@@ -44,7 +41,7 @@
                     {% endif %}
                     {% if user.cliente %} <!-- Check if user has a related Cliente -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'alquileres:list_reservas_cliente' %}">Mis reservas</a>
+                        <a class="nav-link" href="{% url 'alquileres:list_reservas_cliente' cliente_id=user.cliente.id %}">Mis reservas</a>
                     </li>
                     {% endif %}
 
@@ -55,10 +52,10 @@
                     {% else %}
                     <!-- Login link for unauthenticated users -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'alquileres:login' %}">Login</a>
+                        <a class="nav-link" href="{% url 'alquileres:login' %}">Registra tu alojamiento</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'alquileres:register' %}">Register</a>
+                        <a class="nav-link" href="{% url 'alquileres:login' %}">Login</a>
                     </li>
                     {% endif %}
                 </ul>

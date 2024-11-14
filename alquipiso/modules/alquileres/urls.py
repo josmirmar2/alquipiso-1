@@ -25,6 +25,8 @@ urlpatterns = [
     path('reserva/<int:reserva_id>/', views.show_reserva, name='show_reserva'),  # Detalle de reserva
     path('cliente/<int:cliente_id>/reservas/', views.list_reservas_cliente, name='list_reservas_cliente'),  # Reservas de un cliente específico
     path('alojamiento/<int:alojamiento_id>/reservas/', views.list_reservas_alojamiento, name='list_reservas_alojamiento'),  # Reservas de un alojamiento específico
+    path('create_reserva/<int:alojamiento_id>/', views.create_reserva, name='create_reserva'),
+    path('pago_reserva/<int:reserva_id>/', views.pago_reserva, name='pago_reserva'),
 
     path('register/', views.register, name='register'),  # Registro de usuario
     path('login/', views.login_view, name='login'),  # Inicio de sesión
