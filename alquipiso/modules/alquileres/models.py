@@ -18,16 +18,16 @@ class Alojamiento(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-        # Redimensionar la imagen
         if self.imagen:
+            # Redimensionar imagen
             img_path = self.imagen.path
             img = Image.open(img_path)
 
-            # Establecer el tamaño deseado (por ejemplo, 300x300 píxeles)
-            max_size = (300, 300)
-            img.thumbnail(max_size, Image.ANTIALIAS)
+            # Aplicar redimensionamiento
+            max_size = (800, 600)
+            img.thumbnail(max_size, Image.Resampling.LANCZOS)  # Cambiado de Image.ANTIALIAS
 
-            # Guardar la imagen redimensionada
+            # Sobrescribir la imagen
             img.save(img_path)
     
 class Cliente(models.Model):

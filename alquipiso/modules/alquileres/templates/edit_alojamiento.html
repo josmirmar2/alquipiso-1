@@ -1,0 +1,61 @@
+<!-- templates/edit_alojamiento.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Editar {{ alojamiento.nombre }}</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1>Editar Alojamiento</h1>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Nombre -->
+            <div class="form-group mb-3">
+                <label for="nombre">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" value="{{ form.nombre.value }}" required>
+            </div>
+
+            <!-- Dirección -->
+            <div class="form-group mb-3">
+                <label for="direccion">Dirección</label>
+                <input type="text" class="form-control" id="direccion" name="direccion" value="{{ form.direccion.value }}" required>
+            </div>
+
+            <!-- Ciudad -->
+            <div class="form-group mb-3">
+                <label for="ciudad">Ciudad</label>
+                <input type="text" class="form-control" id="ciudad" name="ciudad" value="{{ form.ciudad.value }}" required>
+            </div>
+
+            <!-- Descripción -->
+            <div class="form-group mb-3">
+                <label for="descripcion">Descripción</label>
+                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required>{{ form.descripcion.value }}</textarea>
+            </div>
+
+            <!-- Precio -->
+            <div class="form-group mb-3">
+                <label for="precio">Precio por noche</label>
+                <input type="number" class="form-control" id="precio" name="precio" value="{{ form.precio.value }}" step="0.01" required>
+            </div>
+
+            <!-- Imagen -->
+            <div class="form-group mb-3">
+                <label for="imagen">Imagen</label>
+                <input type="file" class="form-control" id="imagen" name="imagen">
+                {% if alojamiento.imagen %}
+                    <p class="mt-2">Imagen actual:</p>
+                    <img src="{{ alojamiento.imagen.url }}" alt="Imagen de {{ alojamiento.nombre }}" class="img-thumbnail" style="max-width: 200px;">
+                {% endif %}
+            </div>
+
+            <!-- Botones -->
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <a href="{% url 'alquileres:show_alojamiento' alojamiento.id %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+{% endblock content %}

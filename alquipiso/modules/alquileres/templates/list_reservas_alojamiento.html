@@ -1,0 +1,23 @@
+<!-- templates/list_reservas_alojamiento.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Reservas de {{ alojamiento.nombre }}</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1>Reservas de {{ alojamiento.nombre }}</h1>
+        <ul class="list-group">
+            {% for reserva in reservas %}
+                <li class="list-group-item">
+                    <p><strong>Cliente:</strong> {{ reserva.cliente.user.username }}</p>
+                    <p><strong>Fechas:</strong> {{ reserva.fecha_entrada }} - {{ reserva.fecha_salida }}</p>
+                    <p><strong>Pagado:</strong> {{ reserva.pagado|yesno:"Sí,No" }}</p>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No hay reservas para este alojamiento.</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock content %}

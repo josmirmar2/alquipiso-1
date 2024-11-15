@@ -16,15 +16,28 @@
             {% endif %}
         {% endif %}
 
-        <ul class="list-group">
+        <div class="row">
             {% for alojamiento in alojamientos %}
-                <div>
-                    <h3>{{ alojamiento.nombre }}</h3>
-                    <p>{{ alojamiento.descripcion }}</p>
-                    <!-- Link to the show_alojamiento view, passing the alojamiento's ID -->
-                    <a href="{% url 'alquileres:show_alojamiento' alojamiento_id=alojamiento.id %}">Ver Detalles</a>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        {% if alojamiento.imagen %}
+                            <img src="{{ alojamiento.imagen.url }}" class="card-img-top" alt="{{ alojamiento.nombre }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h3 class="card-title">{{ alojamiento.nombre }}</h3>
+                            <p class="card-text">{{ alojamiento.descripcion }}</p>
+                            <div class="d-flex justify-content-between">
+                                <!-- Botón Ver Detalles -->
+                                <a href="{% url 'alquileres:show_alojamiento' alojamiento_id=alojamiento.id %}" 
+                                   class="btn btn-primary">Ver Detalles</a>
+                                <!-- Botón Reservas del Alojamiento -->
+                                <a href="{% url 'alquileres:list_reservas_alojamiento' alojamiento_id=alojamiento.id %}" 
+                                   class="btn btn-secondary">Reservas del alojamiento</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             {% endfor %}
-        </ul>
+        </div>
     </div>
 {% endblock content %}

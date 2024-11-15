@@ -15,5 +15,8 @@
         {% if alojamiento.imagen %}
             <img src="{{ alojamiento.imagen.url }}" class="img-fluid" alt="Imagen de {{ alojamiento.nombre }}">
         {% endif %}
+        {% if user.is_authenticated and user == alojamiento.propietario.user %}
+            <a href="{% url 'alquileres:edit_alojamiento' alojamiento.id %}" class="btn btn-warning">Editar</a>
+        {% endif %}
     </div>
 {% endblock content %}

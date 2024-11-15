@@ -195,3 +195,35 @@ def pago_reserva(request, reserva_id):
     
     # Renderizamos el formulario de pago
     return render(request, 'pago_reserva.html', {'reserva': reserva})
+
+@login_required
+def edit_alojamiento(request, alojamiento_id):
+    alojamiento = get_object_or_404(Alojamiento, id=alojamiento_id)
+
+    # Verificar que el usuario autenticado sea el propietario del alojamiento
+    if request.user != alojamiento.propietario.user:
+        messages.error(request, "No tienes permiso para editar este alojamiento.")
+        return redirect('alquileres:show_alojamiento', alojamiento_id=alojamiento_id)
+
+    if request.method == 'POST':
+        form = AlojamientoForm(request.POST, request.FILES, instance=alojamiento)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Alojamiento actualizado con éxito.")
+            return redirect('alquileres:show_alojamiento', alojamiento_id=alojamiento_id)
+        else:
+            messages.error(request, "Hubo un error al actualizar el alojamiento.")
+    else:
+        form = AlojamientoForm(instance=alojamiento)
+
+    return render(request, 'edit_alojamiento.html', {'form': form, 'alojamiento': alojamiento})
+
+@login_required
+def list_reservas_alojamiento(request, alojamiento_id):
+    alojamiento = get_object_or_404(Alojamiento, id=alojamiento_id)
+    reservas = Reserva.objects.filter(alojamiento=alojamiento)
+
+    return render(request, 'list_reservas_alojamiento.html', {
+        'alojamiento': alojamiento,
+        'reservas': reservas
+    })
