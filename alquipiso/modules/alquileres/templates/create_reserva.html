@@ -11,15 +11,42 @@
     <form method="post">
         {% csrf_token %}
 
+        <!-- Mensajes de error generales del formulario -->
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
         <!-- Formulario de reserva -->
         <div class="form-group">
             <label for="fecha_entrada">Fecha de entrada:</label>
             {{ form.fecha_entrada }}
+            <!-- Mostrar errores de fecha_entrada -->
+            {% if form.fecha_entrada.errors %}
+            <div class="text-danger">
+                {% for error in form.fecha_entrada.errors %}
+                <small>{{ error }}</small>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
 
         <div class="form-group">
             <label for="fecha_salida">Fecha de salida:</label>
             {{ form.fecha_salida }}
+            <!-- Mostrar errores de fecha_salida -->
+            {% if form.fecha_salida.errors %}
+            <div class="text-danger">
+                {% for error in form.fecha_salida.errors %}
+                <small>{{ error }}</small>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
 
         <!-- Campo para mostrar el precio total calculado (solo lectura) -->
@@ -47,14 +74,16 @@
             // Verificar si las fechas son válidas
             if (diffDays > 0) {
                 // Calcular el precio (suponiendo que el precio por noche se pasa como variable o está en el alojamiento)
-                var precioPorNoche = parseFloat("{{ alojamiento.precio }}")
-            };  // Asegúrate de pasar el precio por noche al template
-            var precioTotal = diffDays * precioPorNoche;
-            document.getElementById('precio_total').value = precioTotal.toFixed(2);
+                var precioPorNoche = parseFloat("{{ alojamiento.precio }}");
+                var precioTotal = diffDays * precioPorNoche;
+                document.getElementById('precio_total').value = precioTotal.toFixed(2);
+            } else {
+                document.getElementById('precio_total').value = "0.00";
+            }
         } else {
             document.getElementById('precio_total').value = "0.00";
         }
-    } 
+    }
 
     // Añadir event listeners para recalcular el precio cuando se cambien las fechas
     document.getElementById('fecha_entrada').addEventListener('change', calcularPrecio);

@@ -168,6 +168,7 @@ def create_reserva(request, alojamiento_id):
     
     if request.method == 'POST':
         form = ReservaForm(request.POST)
+        form.instance.alojamiento = alojamiento  # Asignar el alojamiento al formulario
         if form.is_valid():
             # Crear la reserva
             reserva = form.save(commit=False)
