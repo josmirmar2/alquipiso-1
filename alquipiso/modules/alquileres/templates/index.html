@@ -76,27 +76,32 @@
     <h1>{{ welcome_text }}</h1>
     <p>Bienvenido a nuestra plataforma de gestión de alquileres.</p>
 
-    <div class="card-deck">
+    <div class="d-flex flex-column justify-content-center">
         {% for alojamiento in alojamientos %}
-        <div class="card">
-            <!-- Imagen del alojamiento -->
-            <img src="{{ alojamiento.imagen.url }}" alt="Imagen de {{ alojamiento.nombre }}" class="card-img-top">
-
-            <div class="card-body">
-                <!-- Nombre del alojamiento -->
-                <h5 class="card-title">{{ alojamiento.nombre }}</h5>
-
-                <!-- Dirección y ciudad -->
-                <p class="card-text">{{ alojamiento.direccion }}, {{ alojamiento.ciudad }}</p>
-
-                <!-- Precio por noche -->
-                <p class="card-text"><strong>Precio por noche:</strong> ${{ alojamiento.precio }}</p>
-
-                <!-- Botón de reserva -->
-                <a href="{% if user.is_authenticated %}{% url 'alquileres:create_reserva' alojamiento.id %}{% else %}{% url 'alquileres:login' %}{% endif %}"
-                    class="btn-reserve">
+        <div class="card bg-ligth border-dark" style="width: 720px; margin-bottom: 2vh; align-self:center">
+            <div class="row g-1">
+              <div class="col-md-8">
+                <img src="{{ alojamiento.imagen.url }}" alt="Imagen de {{ alojamiento.nombre }}"
+                class="img-fluid rounded-start" style = "width:50vh; height:25vh",>
+              </div>
+              <div class="col-md-4">
+                <div class="card-body" style="display: flex; flex-direction: column; align-items: center">
+                  <h5 class="card-title-decoration-underline" style="margin-right: 2vh; font-size: 3vh">
+                    {{alojamiento.nombre}}</h5>
+                  <p class="card-text">
+                    {{ alojamiento.direccion }}, {{ alojamiento.ciudad }}
+                  </p>
+                  <p class="card-text">
+                    <strong>Precio por noche:</strong> ${{ alojamiento.precio }}
+                  </p>
+                  <a href="{% if user.is_authenticated %}{% url 'alquileres:create_reserva' alojamiento.id %}
+                            {% else %}{% url 'alquileres:login' %}{% endif %}"
+                    class="btn btn-outline-dark"
+                    style="align-self: end">
                     Reservar
                 </a>
+                </div>
+               </div>
             </div>
         </div>
         {% empty %}
