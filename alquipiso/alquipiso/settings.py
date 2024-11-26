@@ -133,3 +133,7 @@ MEDIA_URL = '/media/'
 # The absolute filesystem path to the directory where media files will be stored
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+STRIPE_SECRET_KEY = 'sk_test_51QPNbqFSJFG8C7sOxyEAUk2v9hbyiZuFDJPpqQdATQ1DhWZM58Z1eD1qzReX1HpmQiNjWHKWugPeeyv51yGRoHUE003juwGGeN'
+STRIPE_PUBLIC_KEY = 'pk_test_51QPNbqFSJFG8C7sO5n4Ooe1Uc2sA827AuPqhc70kYNxiUhW9KW0uE4ccty8YV8v3WRdHjWfbZi2pFEC1XpZmLgRy00dsXZoUeZ'
+
+

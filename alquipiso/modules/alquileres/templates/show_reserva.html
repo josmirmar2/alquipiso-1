@@ -15,7 +15,7 @@
 
         {% if not reserva.pagado %}
             <!-- Botón para redirigir a la pasarela de pago -->
-            <a href="{% url 'alquileres:pago_reserva' reserva.id %}" class="btn btn-primary mt-3">Pagar ahora</a>
+            <a href="{% url 'alquileres:procesar_pago' reserva.id %}" class="btn btn-primary mt-3">Pagar ahora</a>
         {% endif %}
     </div>
 {% endblock content %}

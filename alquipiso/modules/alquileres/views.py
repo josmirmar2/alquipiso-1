@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from alquipiso import settings
 from .forms import AlojamientoForm, UserRegistrationForm, ReservaForm
 from .models import Cliente, Propietario
 from django.contrib.auth import login, authenticate, logout
@@ -7,6 +10,10 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+import stripe
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
 
 from modules.alquileres.models import *
 
@@ -177,25 +184,65 @@ def create_reserva(request, alojamiento_id):
             reserva.precio_total = reserva.calcular_precio_total()  # Calcular el precio total
             reserva.fecha_reserva = timezone.now()
             reserva.save()
-            return redirect('alquileres:pago_reserva', reserva_id=reserva.id)  # Redirigir después de guardar
+            
+            # Redirigir a la página de detalles de la reserva
+            return redirect('alquileres:detalles_reserva', reserva_id=reserva.id)  # Redirigir a la vista de detalles de la reserva
     else:
         form = ReservaForm()
 
     return render(request, 'create_reserva.html', {'form': form, 'alojamiento': alojamiento, 'precio': alojamiento.precio})
 
 @login_required
-def pago_reserva(request, reserva_id):
-    reserva = get_object_or_404(Reserva, id=reserva_id, cliente=request.user.cliente)
+def detalles_reserva(request, reserva_id):
+    # Obtener la reserva de la base de datos
+    reserva = get_object_or_404(Reserva, id=reserva_id)
+    
+    # Pasar la clave pública de Stripe desde settings
+    stripe_public_key = settings.STRIPE_PUBLIC_KEY  # Asegúrate de tener esta configuración en tu settings.py
+
+    return render(request, 'detalles_reserva.html', {
+        'reserva': reserva,
+        'stripe_public_key': stripe_public_key,  # Incluir la clave pública de Stripe
+    })
+
+@login_required
+def procesar_pago(request, reserva_id):
+    # Obtener el modelo de la reserva
+    reserva = get_object_or_404(Reserva, id=reserva_id)
     
     if request.method == 'POST':
-        # Aquí se procesaría el pago ficticio. Si es exitoso:
-        reserva.pagado = True
-        reserva.save()
-        # Redirigir a una página de confirmación o al índice
-        return redirect('alquileres:list_reservas_cliente', cliente_id=request.user.cliente.id)
+        try:
+            # Crear una sesión de Stripe Checkout
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[
+                    {
+                        'price_data': {
+                            'currency': 'eur',
+                            'product_data': {
+                                'name': reserva.alojamiento.nombre,
+                            },
+                            'unit_amount': int(reserva.precio_total * 100),  # Convertir euros a céntimos
+                        },
+                        'quantity': 1,
+                    },
+                ],
+                mode='payment',
+                success_url=request.build_absolute_uri('/alquileres/pago-exitoso/'),
+                cancel_url=request.build_absolute_uri('/alquileres/pago-cancelado/'),
+            )
+            # Devolver la URL de la sesión en formato JSON
+            return JsonResponse({'url': session.url})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
     
-    # Renderizamos el formulario de pago
-    return render(request, 'pago_reserva.html', {'reserva': reserva})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+def pago_exitoso(request):
+    return render(request, 'pago_exitoso.html')
+
+def pago_cancelado(request):
+    return render(request, 'pago_cancelado.html')
 
 @login_required
 def edit_alojamiento(request, alojamiento_id):
