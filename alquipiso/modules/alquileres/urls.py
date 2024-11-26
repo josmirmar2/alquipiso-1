@@ -33,6 +33,7 @@ urlpatterns = [
     path('pagar/<int:reserva_id>/', views.procesar_pago, name='procesar_pago'),
     path('pago-exitoso/', views.pago_exitoso, name='pago_exitoso'),
     path('pago-cancelado/', views.pago_cancelado, name='pago_cancelado'),
+    path('webhook/', views.stripe_webhook, name='stripe_webhook'),
 
     path('register/', views.register, name='register'),  # Registro de usuario
     path('login/', views.login_view, name='login'),  # Inicio de sesión

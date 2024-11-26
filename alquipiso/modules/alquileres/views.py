@@ -11,6 +11,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 import stripe
+import logging
+from django.core.mail import send_mail
+logger = logging.getLogger(__name__)
+
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -230,6 +234,9 @@ def procesar_pago(request, reserva_id):
                 mode='payment',
                 success_url=request.build_absolute_uri('/alquileres/pago-exitoso/'),
                 cancel_url=request.build_absolute_uri('/alquileres/pago-cancelado/'),
+                metadata={
+                    'reserva_id': reserva.id,  # Incluir la referencia de la reserva
+                },
             )
             # Devolver la URL de la sesión en formato JSON
             return JsonResponse({'url': session.url})
@@ -275,3 +282,46 @@ def list_reservas_alojamiento(request, alojamiento_id):
         'alojamiento': alojamiento,
         'reservas': reservas
     })
+
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    endpoint_secret = settings.STRIPE_ENDPOINT_SECRET  # Cambia esto por el secreto de tu webhook
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        return JsonResponse({'error': 'Invalid payload'}, status=400)
+    except stripe.error.SignatureVerificationError as e:
+        return JsonResponse({'error': 'Invalid signature'}, status=400)
+
+    # Verificar si el evento es un pago exitoso
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+
+        # Obtener los datos de la sesión de pago
+        cliente_email = session.get('customer_details', {}).get('email')
+        reserva_id = session.get('metadata', {}).get('reserva_id')  # Asegúrate de pasar esto al crear la sesión
+        
+        # Actualizar el estado de la reserva
+        if reserva_id:
+            from .models import Reserva
+            reserva = Reserva.objects.filter(id=reserva_id).first()
+            if reserva:
+                reserva.pagado = True
+                reserva.save()
+
+                # Enviar un correo de confirmación al cliente
+                if cliente_email:
+                    send_mail(
+                        subject='Confirmación de Reserva',
+                        message=f'Hola, tu reserva para {reserva.alojamiento.nombre} ha sido confirmada.',
+                        from_email=settings.EMAIL_HOST_USER,
+                        recipient_list=[cliente_email],
+                        fail_silently=False,
+                    )
+
+    return JsonResponse({'status': 'success'})
