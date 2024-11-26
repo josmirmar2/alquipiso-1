@@ -83,7 +83,7 @@
 
 {% block content %}
     <div class="register-container">
-        <div class="register-card">
+        <div class="register-card" style="display:flex; flex-direction:column; align-items:center; align-self:center; margin-top:2vh">
             <h2>Registro</h2>
 
             <!-- Mostrar los mensajes de error si existen -->
@@ -96,10 +96,32 @@
             {% endif %}
 
             <!-- Formulario de registro -->
-            <form method="POST">
+            <form method="POST" style="display:flex; flex-direction:column; align-items:center">
                 {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Registrar</button>
+                <label for="id_email" class="form-label">Email</label>
+                <input type="email" name="email" maxlength="320" required id="id_email" class="form-control"/>
+
+                <label for="id_nombre" class="form-label">Nombre</label>
+                <input type="text" name="nombre" maxlength="100" required id="id_nombre" class="form-control"/>
+
+                <label for="id_apellido" class="form-label">Apellido</label>
+                <input type="text" name="apellido" maxlength="100" required id="id_apellido" class="form-control"/>
+                
+                <label for="id_telefono" class="form-label">Telefono</label>
+                <input type="text" name="telefono" maxlength="100" required id="id_telefono" class="form-control"/>
+                
+                <label for="id_password" class="form-label">Password</label>
+                <input type="password" name="password" required id="id_password" class="form-control"/>
+                
+                <label for="id_confirm_password" class="form-label">Confirm Password</label>
+                <input type="password" name="confirm_password" required id="id_confirm_password" class="form-control"/>
+                
+                <label for="id_role" class="form-label">Role</label>
+                <select name="role" id="id_role"class="form-control">
+                    <option value="cliente">Cliente</option>
+                    <option value="propietario">Propietario</option>
+                </select>
+                <button type="submit" class="btn btn-primary" style="margin-top:2vh">Registrar</button>
             </form>
 
             <!-- Enlace para loguearse si ya tienen cuenta -->
