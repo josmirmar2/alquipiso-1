@@ -73,12 +73,11 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1>{{ welcome_text }}</h1>
-    <p>Bienvenido a nuestra plataforma de gestión de alquileres.</p>
+    <h1 style="align-self:end">{{ welcome_text }}</h1>
 
     <div class="d-flex flex-column justify-content-center">
         {% for alojamiento in alojamientos %}
-        <div class="card bg-ligth border-dark" style="width: 720px; margin-bottom: 2vh; align-self:center">
+        <div class="card bg-ligth border-dark" style="width: 750px; margin-bottom: 2vh; align-self:center">
             <div class="row g-1">
               <div class="col-md-8">
                 <img src="{{ alojamiento.imagen.url }}" alt="Imagen de {{ alojamiento.nombre }}"
@@ -97,8 +96,12 @@
                   <a href="{% if user.is_authenticated %}{% url 'alquileres:create_reserva' alojamiento.id %}
                             {% else %}{% url 'alquileres:login' %}{% endif %}"
                     class="btn btn-outline-dark"
-                    style="align-self: end">
+                    style="align-self: end; margin-bottom:1vh">
                     Reservar
+                </a>
+                <a href="{% url 'alquileres:show_alojamiento' alojamiento_id=alojamiento.id %}" 
+                    class="btn btn-outline-dark" style="align-self: end">
+                    Ver Detalles
                 </a>
                 </div>
                </div>
