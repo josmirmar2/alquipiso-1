@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-(!*d%n-f(9+kb6crztc+4yo++kyc*0^0l@-6uxx5zhnq1zn+pg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',       # Permite localhost
@@ -91,7 +91,7 @@ WSGI_APPLICATION = 'alquipiso.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'alquipiso.db',
+        'NAME': os.path.join(BASE_DIR, 'alquipiso.db'),
     }
 }
 
@@ -152,9 +152,9 @@ STRIPE_ENDPOINT_SECRET = "whsec_MC7m9v4urGaQATOaYdviqNxmnisxkXdT"
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'alejandronb01@gmail.com'  
-EMAIL_HOST_PASSWORD = 'vaby pfwy kepf czvw'  
+EMAIL_HOST_USER = 'alejandronb01@gmail.com'
+EMAIL_HOST_PASSWORD = 'vaby pfwy kepf czvw'
 
