@@ -24,12 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-(!*d%n-f(9+kb6crztc+4yo++kyc*0^0l@-6uxx5zhnq1zn+pg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     '127.0.0.1',       # Permite localhost
     'localhost',       # También localhost
-    '65e0-86-127-226-129.ngrok-free.app',  # Dominio público de ngrok
+    '.pythonanywhere.com',  # Dominio público de ngrok
 
 ]
 
