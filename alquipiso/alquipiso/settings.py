@@ -26,7 +26,20 @@ SECRET_KEY = 'django-insecure-(!*d%n-f(9+kb6crztc+4yo++kyc*0^0l@-6uxx5zhnq1zn+pg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',       # Permite localhost
+    'localhost',       # También localhost
+    '.pythonanywhere.com',  # Dominio público de ngrok
+
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://65e0-86-127-226-129.ngrok-free.app',  # Ajusta según tu URL de Ngrok
+]
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 
 
 # Application definition
@@ -78,7 +91,7 @@ WSGI_APPLICATION = 'alquipiso.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'alquipiso.db',
+        'NAME': os.path.join(BASE_DIR, 'alquipiso.db'),
     }
 }
 
@@ -132,4 +145,16 @@ MEDIA_URL = '/media/'
 
 # The absolute filesystem path to the directory where media files will be stored
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STRIPE_SECRET_KEY = 'sk_test_51QPNbqFSJFG8C7sOxyEAUk2v9hbyiZuFDJPpqQdATQ1DhWZM58Z1eD1qzReX1HpmQiNjWHKWugPeeyv51yGRoHUE003juwGGeN'
+STRIPE_PUBLIC_KEY = 'pk_test_51QPNbqFSJFG8C7sO5n4Ooe1Uc2sA827AuPqhc70kYNxiUhW9KW0uE4ccty8YV8v3WRdHjWfbZi2pFEC1XpZmLgRy00dsXZoUeZ'
+STRIPE_ENDPOINT_SECRET = "whsec_MC7m9v4urGaQATOaYdviqNxmnisxkXdT"
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'alejandronb01@gmail.com'
+EMAIL_HOST_PASSWORD = 'vaby pfwy kepf czvw'
 

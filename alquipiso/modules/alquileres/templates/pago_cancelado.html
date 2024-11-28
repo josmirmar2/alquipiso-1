@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Pago Cancelado</h2>
+    <p>El pago fue cancelado. Puede intentarlo nuevamente accediendo a "Mis reservas" y viendo las reservas "Pendientes de pago".</p>
+    <p><a href="{% url 'index' %}">Volver al inicio</a></p>
+</div>
+{% endblock content %}

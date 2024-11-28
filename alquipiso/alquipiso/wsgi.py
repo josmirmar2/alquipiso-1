@@ -8,6 +8,11 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/wsgi/
 """
 
 import os
+import sys
+
+project_path = "/home/alenicbra/alquipiso"
+if project_path not in sys.path:
+    sys.path.append(project_path)
 
 from django.core.wsgi import get_wsgi_application
 
