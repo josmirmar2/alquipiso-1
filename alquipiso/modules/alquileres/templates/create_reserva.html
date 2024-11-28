@@ -6,7 +6,21 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Reserva para el alojamiento: {{ alojamiento.nombre }}</h2>
+    <h2 class="text-center">Reserva para el alojamiento: {{ alojamiento.nombre }}</h2>
+
+    <div class="row text-center" style="margin-top:25px">
+        <div class="col-md-6">
+            {% if alojamiento.imagen %}
+                <img src="{{ alojamiento.imagen.url }}" class="img-fluid rounded" alt="Imagen de {{ alojamiento.nombre }}">
+            {% endif %}
+        </div>
+        <div class="col-md-6" style="margin-top:12vh">
+            <p><strong>Dirección:</strong> {{ alojamiento.direccion }}</p>
+            <p><strong>Ciudad:</strong> {{ alojamiento.ciudad }}</p>
+            <p><strong>Descripción:</strong> {{ alojamiento.descripcion }}</p>
+            <p><strong>Precio:</strong> ${{ alojamiento.precio }} por noche</p>
+        </div>
+    </div>
 
     <form method="post">
         {% csrf_token %}
@@ -55,7 +69,7 @@
             <input type="text" class="form-control" id="precio_total" value="0.00" readonly>
         </div>
 
-        <button type="submit" class="btn btn-primary">Confirmar Reserva</button>
+        <button type="submit" class="btn btn-primary" style="margin-top:1vh">Confirmar Reserva</button>
     </form>
 </div>
 
