@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from alquipiso import settings
-from .forms import AlojamientoForm, UserRegistrationForm, ReservaForm
-from .models import Cliente, Propietario
+from .forms import AlojamientoForm, UserRegistrationForm, ReservaForm, UserEditForm
+from .models import Cliente, Propietario, Notificacion
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -13,6 +13,9 @@ from django.utils import timezone
 import stripe
 import logging
 from django.core.mail import send_mail
+from datetime import timedelta
+from django.utils.timezone import now
+from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
@@ -23,12 +26,84 @@ from modules.alquileres.models import *
 
 # Create your views here.
 
+
 def index(request):
-    alojamientos = Alojamiento.objects.all()  # Obtén todos los alojamientos de la base de datos
-    welcome_text = "Encuentra tu próximo destino con AlquiPiso"
+    ciudad = request.GET.get('ciudad', '')
+    fecha_entrada = request.GET.get('fecha_entrada', '')
+    fecha_salida = request.GET.get('fecha_salida', '')
+
+    # Obtener todos los alojamientos si no hay filtros
+    alojamientos = Alojamiento.objects.all()
+
+    # Filtrar por ciudad si es que se proporcionó
+    if ciudad:
+        alojamientos = alojamientos.filter(ciudad__iexact=ciudad)
+
+    # Filtrar por fechas si se proporcionaron
+    if fecha_entrada and fecha_salida:
+        try:
+            # Convertir las fechas de strings a objetos datetime
+            fecha_entrada = datetime.strptime(fecha_entrada, '%Y-%m-%d').date()  # Convertimos a date
+            fecha_salida = datetime.strptime(fecha_salida, '%Y-%m-%d').date()  # Convertimos a date
+
+            # Filtrar alojamientos disponibles (no solapados con reservas existentes)
+            alojamientos_disponibles = []
+
+            for alojamiento in alojamientos:
+                # Consultamos las reservas existentes para ese alojamiento
+                reservas_existentes = Reserva.objects.filter(alojamiento=alojamiento)
+
+                disponible = True
+                for reserva in reservas_existentes:
+                    # Caso 1: La búsqueda está completamente dentro de una reserva existente
+                    if fecha_entrada >= reserva.fecha_entrada and fecha_salida <= reserva.fecha_salida:
+                        disponible = False
+                        break
+
+                    # Caso 2: La reserva existente está completamente dentro de las fechas de la búsqueda
+                    if fecha_entrada <= reserva.fecha_entrada and fecha_salida >= reserva.fecha_salida:
+                        disponible = False
+                        break
+
+                    # Caso 3: La fecha de entrada de la búsqueda está dentro del rango de una reserva existente
+                    if fecha_entrada >= reserva.fecha_entrada and fecha_entrada < reserva.fecha_salida:
+                        disponible = False
+                        break
+
+                    # Caso 4: La fecha de salida de la búsqueda está dentro del rango de una reserva existente
+                    if fecha_salida > reserva.fecha_entrada and fecha_salida <= reserva.fecha_salida:
+                        disponible = False
+                        break
+
+                    # Caso 5: Las fechas de la búsqueda son exactamente iguales a una reserva existente
+                    if fecha_entrada == reserva.fecha_entrada and fecha_salida == reserva.fecha_salida:
+                        disponible = False
+                        break
+
+                # Si el alojamiento es disponible, lo agregamos a la lista de alojamientos disponibles
+                if disponible:
+                    alojamientos_disponibles.append(alojamiento)
+
+            # Mostrar solo los alojamientos disponibles
+            return render(request, 'index.html', {
+                'alojamientos': alojamientos_disponibles,
+                'ciudad': ciudad,
+                'fecha_entrada': fecha_entrada,
+                'fecha_salida': fecha_salida,
+                'welcome_text': "Encuentra tu próximo destino con AlquiPiso",
+            })
+
+        except ValueError:
+            # Si la fecha no es válida, simplemente no filtramos por fechas y mostramos todos los alojamientos
+            return render(request, 'index.html', {
+                'alojamientos': alojamientos,
+                'welcome_text': "Encuentra tu próximo destino con AlquiPiso",
+            })
+
+    # Si no hay búsqueda por fechas, simplemente mostramos todos los alojamientos
     return render(request, 'index.html', {
         'alojamientos': alojamientos,
-        'welcome_text': welcome_text,
+        'welcome_text': "Encuentra tu próximo destino con AlquiPiso",
     })
 
 def list_alojamientos(request):
@@ -188,6 +263,15 @@ def create_reserva(request, alojamiento_id):
             reserva.precio_total = reserva.calcular_precio_total()  # Calcular el precio total
             reserva.fecha_reserva = timezone.now()
             reserva.save()
+
+            # Crear notificación para el propietario
+            propietario = alojamiento.propietario.user
+            mensaje = f"Se ha realizado una nueva reserva para su alojamiento '{alojamiento.nombre}' del {reserva.fecha_entrada} al {reserva.fecha_salida}."
+            Notificacion.objects.create(recipiente=propietario, mensaje=mensaje)
+            
+            # Crear notificación para el cliente
+            mensaje_cliente = f"Ha realizado una reserva en el alojamiento '{alojamiento.nombre}' del {reserva.fecha_entrada} al {reserva.fecha_salida}."
+            Notificacion.objects.create(recipiente=request.user, mensaje=mensaje_cliente)
             
             # Redirigir a la página de detalles de la reserva
             return redirect('alquileres:detalles_reserva', reserva_id=reserva.id)  # Redirigir a la vista de detalles de la reserva
@@ -324,4 +408,132 @@ def stripe_webhook(request):
                         fail_silently=False,
                     )
 
+        # Crear notificación para el cliente y propietario tras pago exitoso
+    cliente_mensaje = f"El pago de su reserva en '{reserva.alojamiento.nombre}' ha sido exitoso."
+    Notificacion.objects.create(recipiente=request.user, mensaje=cliente_mensaje)
+
+    propietario_mensaje = f"El cliente ha pagado la reserva en su alojamiento '{reserva.alojamiento.nombre}' del {reserva.fecha_entrada} al {reserva.fecha_salida}."
+    Notificacion.objects.create(recipiente=reserva.alojamiento.propietario.user, mensaje=propietario_mensaje)
+            
+
     return JsonResponse({'status': 'success'})
+
+@login_required
+def delete_reserva(request, reserva_id):
+    """
+    Cancelar una reserva con restricciones.
+    """
+    reserva = get_object_or_404(Reserva, id=reserva_id)
+
+    # Verificar si el usuario es el cliente asociado a la reserva
+    if reserva.cliente.user != request.user:
+        messages.error(request, "No tienes permiso para cancelar esta reserva.")
+        return redirect('alquileres:detalles_reserva', reserva_id=reserva.id)
+
+    # Validar restricciones para cancelar reservas pagadas
+    if reserva.pagado:
+        dias_para_inicio = (reserva.fecha_entrada - now().date()).days
+        if dias_para_inicio <= 30:
+            messages.error(
+                request, 
+                "No puedes cancelar esta reserva porque faltan menos de 30 días para su inicio."
+            )
+            return redirect('alquileres:detalles_reserva', reserva_id=reserva.id)
+
+    # Si pasa las restricciones, eliminar la reserva
+    reserva.delete()
+    messages.success(request, "Reserva cancelada con éxito.")
+    return redirect('alquileres:list_reservas_cliente', cliente_id=request.user.cliente.id)
+
+def eliminar_reservas_no_pagadas():
+    """
+    Eliminar automáticamente reservas pendientes de pago después de 24 horas.
+    """
+    limite = now() - timedelta(hours=24)
+    reservas_pendientes = Reserva.objects.filter(pagado=False, fecha_reserva__lte=limite)
+
+    eliminadas = reservas_pendientes.count()
+    reservas_pendientes.delete()
+
+    return f"{eliminadas} reservas pendientes de pago eliminadas."
+
+@login_required
+def marcar_notificaciones_como_leidas(request):
+    if request.method == 'POST':
+        # Marcar todas las notificaciones no leídas del usuario como leídas
+        notificaciones_actualizadas = Notificacion.objects.filter(recipiente=request.user, leido=False).update(leido=True)
+        
+        # Verificar si se actualizaron notificaciones
+        if notificaciones_actualizadas > 0:
+            return JsonResponse({'status': 'success', 'message': 'Notificaciones marcadas como leídas'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'No hay notificaciones no leídas'}, status=400)
+
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+@login_required
+def vista_con_notificaciones(request):
+    # Obtener las últimas 6 notificaciones del usuario
+    notificaciones = Notificacion.objects.filter(recipiente=request.user).order_by('-timestamp')[:6]
+
+    # Filtrar las notificaciones no leídas del usuario logueado
+    notificaciones_no_leidas = Notificacion.objects.filter(recipiente=request.user, leido=False)
+
+    # Debug: Imprimir las notificaciones no leídas en la consola del servidor
+    print(f"Usuario logueado: {request.user.id}, Notificaciones no leídas: {notificaciones_no_leidas}")
+
+    # Pasar las notificaciones al template
+    return render(request, 'base.html', {
+        'notificaciones': notificaciones,
+        'notificaciones_no_leidas': notificaciones_no_leidas
+    })
+
+def validar_fechas_disponibles(fecha_entrada, fecha_salida, ciudad):
+    # Filtramos alojamientos por ciudad
+    alojamientos = Alojamiento.objects.filter(ciudad__iexact=ciudad)
+    
+    # Convertir las fechas de entrada y salida a datetime.date para evitar problemas de comparación
+    if isinstance(fecha_entrada, datetime):
+        fecha_entrada = fecha_entrada.date()  # Convertimos a datetime.date
+    if isinstance(fecha_salida, datetime):
+        fecha_salida = fecha_salida.date()  # Convertimos a datetime.date
+
+    for alojamiento in alojamientos:
+        # Consultamos las reservas existentes para ese alojamiento
+        reservas_existentes = Reserva.objects.filter(alojamiento=alojamiento)
+
+        for reserva in reservas_existentes:
+            # Caso 1: Las fechas de la búsqueda engloban las fechas de la reserva
+            if fecha_entrada >= reserva.fecha_entrada and fecha_salida <= reserva.fecha_salida:
+                raise ValidationError(
+                    f"Las fechas seleccionadas están completamente dentro de una reserva existente."
+                )
+            # Caso 2: Las fechas de la reserva engloban las fechas de la búsqueda
+            if fecha_entrada <= reserva.fecha_entrada and fecha_salida >= reserva.fecha_salida:
+                raise ValidationError(
+                    f"Las fechas seleccionadas engloban una reserva existente."
+                )
+            # Caso 3: La fecha de salida de la búsqueda está dentro del rango de una reserva existente
+            if fecha_salida > reserva.fecha_entrada and fecha_salida <= reserva.fecha_salida:
+                raise ValidationError(
+                    f"La fecha de salida seleccionada cae dentro de una reserva existente."
+                )
+            # Caso 4: La fecha de entrada de la búsqueda está dentro del rango de una reserva existente
+            if fecha_entrada >= reserva.fecha_entrada and fecha_entrada < reserva.fecha_salida:
+                raise ValidationError(
+                    f"La fecha de entrada seleccionada cae dentro de una reserva existente."
+                )
+
+    return True
+
+@login_required
+def user_profile(request):
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, instance=request.user, user=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('alquileres:user_profile')
+    else:
+        form = UserEditForm(instance=request.user, user=request.user)
+
+    return render(request, 'user_profile.html', {'form': form})

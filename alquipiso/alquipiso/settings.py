@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-(!*d%n-f(9+kb6crztc+4yo++kyc*0^0l@-6uxx5zhnq1zn+pg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',       # Permite localhost
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'modules.alquileres.apps.AlquileresConfig',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -77,6 +78,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'modules.alquileres.context_processors.notificaciones',
             ],
         },
     },
@@ -157,4 +159,3 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'alejandronb01@gmail.com'  
 EMAIL_HOST_PASSWORD = 'vaby pfwy kepf czvw'  
-

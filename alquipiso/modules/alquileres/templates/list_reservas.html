@@ -7,6 +7,13 @@
 
 {% block content %}
     <div class="container mt-5">
+        {% if messages %}
+            <div class="alert alert-success">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+            </div>
+        {% endif %}
         <h1>Reservas</h1>
 
         <!-- Reservas pagadas -->
@@ -15,7 +22,7 @@
             {% for reserva in reservas %}
                 {% if reserva.pagado %}
                     <li class="list-group-item">
-                        <a href="{% url 'alquileres:show_reserva' reserva.id %}">
+                        <a href="{% url 'alquileres:detalles_reserva' reserva.id %}">
                             Reserva #{{ reserva.id }} - {{ reserva.fecha_entrada }} al {{ reserva.fecha_salida }}
                         </a>
                         <p>Alojamiento: {{ reserva.alojamiento.nombre }}</p>
@@ -32,7 +39,7 @@
             {% for reserva in reservas %}
                 {% if not reserva.pagado %}
                     <li class="list-group-item">
-                        <a href="{% url 'alquileres:show_reserva' reserva.id %}">
+                        <a href="{% url 'alquileres:detalles_reserva' reserva.id %}">
                             Reserva #{{ reserva.id }} - {{ reserva.fecha_entrada }} al {{ reserva.fecha_salida }}
                         </a>
                         <p>Alojamiento: {{ reserva.alojamiento.nombre }}</p>

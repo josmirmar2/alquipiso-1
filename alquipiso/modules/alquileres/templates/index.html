@@ -75,6 +75,25 @@
 <div class="container mt-5">
     <h1 style="align-self:end">{{ welcome_text }}</h1>
 
+    <!-- Mostrar mensajes de error si los campos no están completos -->
+    {% if messages %}
+        <div class="alert alert-danger">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Formulario de búsqueda -->
+    <form method="get" action="{% url 'alquileres:index' %}" class="search-form">
+        <div class="d-flex">
+            <input type="text" name="ciudad" placeholder="Ciudad" class="form-control" value="{{ request.GET.ciudad }}">
+            <input type="date" name="fecha_entrada" placeholder="Fecha de Entrada" class="form-control" value="{{ request.GET.fecha_entrada }}">
+            <input type="date" name="fecha_salida" placeholder="Fecha de Salida" class="form-control" value="{{ request.GET.fecha_salida }}">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </div>
+    </form>
+
     <div class="d-flex flex-column justify-content-center">
         {% for alojamiento in alojamientos %}
         <div class="card bg-ligth border-dark" style="width: 750px; margin-bottom: 2vh; align-self:center">

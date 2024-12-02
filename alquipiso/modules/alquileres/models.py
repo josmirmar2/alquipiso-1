@@ -65,3 +65,11 @@ class Reserva(models.Model):
     def __str__(self):
         return f"Reserva de {self.cliente.user.username} para {self.alojamiento.nombre}"
     
+class Notificacion(models.Model):
+    recipiente = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notificaciones')
+    mensaje = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    leido = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Notification for {self.recipiente.username}: {self.mensaje}"

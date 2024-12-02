@@ -1,6 +1,9 @@
 from django import forms
 from .models import *
 from django.forms import DateInput
+from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import check_password
 
 class UserRegistrationForm(forms.Form):
     email = forms.EmailField()
@@ -110,3 +113,68 @@ class ReservaForm(forms.ModelForm):
                 )
 
         return cleaned_data
+
+
+class UserEditForm(forms.ModelForm):
+    current_password = forms.CharField(
+        widget=forms.PasswordInput,
+        required=False,
+        label='Contraseña actual'
+    )
+    new_password = forms.CharField(
+        widget=forms.PasswordInput,
+        required=False,
+        label='Nueva contraseña'
+    )
+    confirm_new_password = forms.CharField(
+        widget=forms.PasswordInput,
+        required=False,
+        label='Confirmar nueva contraseña'
+    )
+
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name']
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')  # Pasamos el usuario actual para validar la contraseña
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        current_password = cleaned_data.get('current_password')
+        new_password = cleaned_data.get('new_password')
+        confirm_new_password = cleaned_data.get('confirm_new_password')
+
+        # Validar si el usuario desea cambiar su contraseña
+        if current_password or new_password or confirm_new_password:
+            # Asegurarse de que se proporcionaron todos los campos de contraseña
+            if not current_password:
+                raise forms.ValidationError('Debes proporcionar tu contraseña actual.')
+            if not new_password:
+                raise forms.ValidationError('Debes proporcionar una nueva contraseña.')
+            if not confirm_new_password:
+                raise forms.ValidationError('Debes confirmar tu nueva contraseña.')
+
+            # Verificar que la contraseña actual sea correcta
+            if not check_password(current_password, self.user.password):
+                raise forms.ValidationError('La contraseña actual no es correcta.')
+
+            # Asegurarse de que las nuevas contraseñas coincidan
+            if new_password != confirm_new_password:
+                raise forms.ValidationError('Las nuevas contraseñas no coinciden.')
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        # Guardar los cambios del usuario
+        user = super().save(commit=False)
+
+        # Cambiar la contraseña si se proporciona una nueva
+        new_password = self.cleaned_data.get('new_password')
+        if new_password:
+            user.set_password(new_password)
+
+        if commit:
+            user.save()
+        return user
