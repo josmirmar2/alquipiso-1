@@ -93,7 +93,7 @@ WSGI_APPLICATION = 'alquipiso.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'alquipiso.db',
+        'NAME': os.path.join(BASE_DIR, 'alquipiso.db'),
     }
 }
 
@@ -154,8 +154,9 @@ STRIPE_ENDPOINT_SECRET = "whsec_MC7m9v4urGaQATOaYdviqNxmnisxkXdT"
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'alejandronb01@gmail.com'  
 EMAIL_HOST_PASSWORD = 'vaby pfwy kepf czvw'  
+
