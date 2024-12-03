@@ -397,8 +397,7 @@ def stripe_webhook(request):
 
                 alojamiento = reserva.alojamiento
                 reserva_link = f"{request.scheme}://{request.get_host()}/reservas/{reserva.id}/"
-                current_site = Site.objects.get_current()
-                image_url = f"https://{current_site.domain}{alojamiento.imagen.url}"
+                image_url = f"{request.scheme}://{request.get_host()}{alojamiento.imagen.url}"
 
                 # Datos para el correo
                 context = {
