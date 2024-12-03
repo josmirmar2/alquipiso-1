@@ -399,7 +399,7 @@ def stripe_webhook(request):
 
                 alojamiento = reserva.alojamiento
                 reserva_link = f"{request.scheme}://{request.get_host()}/reserva/{reserva.id}/"
-                image_url = f"{request.scheme}://{request.get_host()}{alojamiento.imagen}"
+                image_url = f"{request.scheme}://{request.get_host()}{alojamiento.imagen.url.replace('/media', '')}"
                 print(f"Imagen URL completa: {image_url}")
                 # Datos para el correo
                 context = {
