@@ -21,6 +21,7 @@ from django.utils.timezone import now
 from datetime import datetime
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.db.models import Q
 logger = logging.getLogger(__name__)
 
 
@@ -433,6 +434,20 @@ def stripe_webhook(request):
                 reserva.pagado = True
                 reserva.save()
 
+                reservas_en_conflicto = Reserva.objects.filter(
+                    alojamiento=reserva.alojamiento,
+                    pagado=False
+                ).filter(
+                    Q(fecha_entrada__lte=reserva.fecha_entrada, fecha_salida__gte=reserva.fecha_salida) |  # Caso 1
+                    Q(fecha_entrada__gte=reserva.fecha_entrada, fecha_salida__lte=reserva.fecha_salida) |  # Caso 2
+                    Q(fecha_entrada__gte=reserva.fecha_entrada, fecha_entrada__lt=reserva.fecha_salida) |  # Caso 3
+                    Q(fecha_salida__gt=reserva.fecha_entrada, fecha_salida__lte=reserva.fecha_salida) |   # Caso 4
+                    Q(fecha_entrada__lt=reserva.fecha_salida, fecha_salida__gt=reserva.fecha_entrada)     # Caso 5
+                )
+
+                # Eliminar todas las reservas en conflicto
+                reservas_en_conflicto.delete()
+
                 alojamiento = reserva.alojamiento
                 reserva_link = f"{request.scheme}://{request.get_host()}/alquileres/reserva/{reserva.id}/"
                 image_path = alojamiento.imagen.path  # Ruta absoluta de la imagen
@@ -462,7 +477,6 @@ def stripe_webhook(request):
                         with open(image_path, 'rb') as img_file:
                             image = MIMEImage(img_file.read())
                             image.add_header('Content-ID', '<alojamiento_image>')  # Identificador único
-                            cliente_email_message.attach(image)
 
                     # Ajustar el HTML para referenciar la imagen inline
                     cliente_email_message.attach_alternative(body, "text/html")

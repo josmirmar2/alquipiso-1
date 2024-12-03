@@ -93,7 +93,7 @@ class ReservaForm(forms.ModelForm):
             raise ValidationError("El alojamiento no está definido.")
 
         # Consultar reservas existentes para el alojamiento
-        reservas_existentes = Reserva.objects.filter(alojamiento=alojamiento)
+        reservas_existentes = Reserva.objects.filter(alojamiento=alojamiento, pagado=True)
 
         for reserva in reservas_existentes:
             # Caso 1: Fecha de salida cae durante una reserva existente
