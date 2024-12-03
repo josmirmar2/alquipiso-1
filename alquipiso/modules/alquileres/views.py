@@ -217,9 +217,12 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            # Si la autenticación es exitosa, iniciar sesión y redirigir
+            # Si la autenticación es exitosa, iniciar sesión
             login(request, user)
-            return redirect('alquileres:index')  # Redirige a la página principal
+            
+            # Redirigir al usuario a la página que intentaba acceder (usando 'next' si está presente)
+            next_url = request.GET.get('next', 'alquileres:index')  # Redirige al 'next' o a la página principal
+            return redirect(next_url)
         else:
             # Si la autenticación falla, mostrar mensaje de error
             messages.error(request, 'Credenciales inválidas. Intenta de nuevo.')
@@ -395,8 +398,8 @@ def stripe_webhook(request):
                 reserva.save()
 
                 alojamiento = reserva.alojamiento
-                reserva_link = f"{request.scheme}://{request.get_host()}/alquileres/reserva/{reserva.id}/"
-                image_url = f"{request.scheme}://{request.get_host()}/alquileres/media/{alojamiento.imagen}"
+                reserva_link = f"{request.scheme}://{request.get_host()}/reserva/{reserva.id}/"
+                image_url = f"{request.scheme}://{request.get_host()}{alojamiento.imagen}"
                 print(f"Imagen URL completa: {image_url}")
                 # Datos para el correo
                 context = {
