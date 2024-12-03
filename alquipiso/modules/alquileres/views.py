@@ -397,7 +397,7 @@ def stripe_webhook(request):
                 alojamiento = reserva.alojamiento
                 reserva_link = f"{request.scheme}://{request.get_host()}/reservas/{reserva.id}/"
                 image_url = f"{request.scheme}://{request.get_host()}{alojamiento.imagen.url}"
-
+                print(f"Imagen URL completa: {image_url}")
                 # Datos para el correo
                 context = {
                     'alojamiento': alojamiento,
@@ -410,6 +410,7 @@ def stripe_webhook(request):
                 if cliente_email:
                     subject = 'Confirmación de Reserva'
                     body = render_to_string('emails/reserva_confirmada.html', context)
+                    print(body)
 
                     cliente_email_message = EmailMultiAlternatives(
                         subject=subject,
