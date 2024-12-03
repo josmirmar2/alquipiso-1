@@ -16,6 +16,8 @@ from django.core.mail import send_mail
 from datetime import timedelta
 from django.utils.timezone import now
 from datetime import datetime
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 logger = logging.getLogger(__name__)
 
 
@@ -371,52 +373,75 @@ def list_reservas_alojamiento(request, alojamiento_id):
 def stripe_webhook(request):
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
-    endpoint_secret = settings.STRIPE_ENDPOINT_SECRET  # Cambia esto por el secreto de tu webhook
+    endpoint_secret = settings.STRIPE_ENDPOINT_SECRET
 
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
-        )
-    except ValueError as e:
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+    except ValueError:
         return JsonResponse({'error': 'Invalid payload'}, status=400)
-    except stripe.error.SignatureVerificationError as e:
+    except stripe.error.SignatureVerificationError:
         return JsonResponse({'error': 'Invalid signature'}, status=400)
 
-    # Verificar si el evento es un pago exitoso
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-
-        # Obtener los datos de la sesión de pago
         cliente_email = session.get('customer_details', {}).get('email')
-        reserva_id = session.get('metadata', {}).get('reserva_id')  # Asegúrate de pasar esto al crear la sesión
-        
-        # Actualizar el estado de la reserva
+        reserva_id = session.get('metadata', {}).get('reserva_id')
+
         if reserva_id:
             from .models import Reserva
-            reserva = Reserva.objects.filter(id=reserva_id).first()
+            reserva = Reserva.objects.filter(id=reserva_id).select_related('alojamiento').first()
             if reserva:
                 reserva.pagado = True
                 reserva.save()
 
-                # Enviar un correo de confirmación al cliente
+                alojamiento = reserva.alojamiento
+                reserva_link = f"{request.scheme}://{request.get_host()}/reservas/{reserva.id}/"
+
+                # Datos para el correo
+                context = {
+                    'alojamiento': alojamiento,
+                    'reserva': reserva,
+                    'reserva_link': reserva_link,
+                }
+
+                # Correo para el cliente
                 if cliente_email:
-                    send_mail(
-                        subject='Confirmación de Reserva',
-                        message=f'Hola, tu reserva para {reserva.alojamiento.nombre} ha sido confirmada.',
+                    subject = 'Confirmación de Reserva'
+                    body = render_to_string('emails/reserva_confirmada.html', context)
+
+                    cliente_email_message = EmailMultiAlternatives(
+                        subject=subject,
+                        body='Tu reserva ha sido confirmada.',
                         from_email=settings.EMAIL_HOST_USER,
-                        recipient_list=[cliente_email],
-                        fail_silently=False,
+                        to=[cliente_email],
                     )
+                    cliente_email_message.attach_alternative(body, "text/html")
+                    cliente_email_message.send()
+
+                # Correo para el propietario
+                propietario_email = alojamiento.propietario.user.email
+                if propietario_email:
+                    subject = 'Nueva Reserva Recibida'
+                    body = render_to_string('emails/reserva_confirmada.html', context)
+
+                    propietario_email_message = EmailMultiAlternatives(
+                        subject=subject,
+                        body='Has recibido una nueva reserva.',
+                        from_email=settings.EMAIL_HOST_USER,
+                        to=[propietario_email],
+                    )
+                    propietario_email_message.attach_alternative(body, "text/html")
+                    propietario_email_message.send()
 
         # Crear notificación para el cliente y propietario tras pago exitoso
-    cliente_mensaje = f"El pago de su reserva en '{reserva.alojamiento.nombre}' ha sido exitoso."
-    Notificacion.objects.create(recipiente=request.user, mensaje=cliente_mensaje)
+        cliente_mensaje = f"El pago de su reserva en '{reserva.alojamiento.nombre}' ha sido exitoso."
+        Notificacion.objects.create(recipiente=request.user, mensaje=cliente_mensaje)
 
-    propietario_mensaje = f"El cliente ha pagado la reserva en su alojamiento '{reserva.alojamiento.nombre}' del {reserva.fecha_entrada} al {reserva.fecha_salida}."
-    Notificacion.objects.create(recipiente=reserva.alojamiento.propietario.user, mensaje=propietario_mensaje)
-            
+        propietario_mensaje = f"El cliente ha pagado la reserva en su alojamiento '{reserva.alojamiento.nombre}' del {reserva.fecha_entrada} al {reserva.fecha_salida}."
+        Notificacion.objects.create(recipiente=reserva.alojamiento.propietario.user, mensaje=propietario_mensaje)
 
     return JsonResponse({'status': 'success'})
+
 
 @login_required
 def delete_reserva(request, reserva_id):

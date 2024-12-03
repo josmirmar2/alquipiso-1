@@ -33,9 +33,6 @@ ALLOWED_HOSTS = [
 
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://65e0-86-127-226-129.ngrok-free.app',  # Ajusta según tu URL de Ngrok
-]
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
