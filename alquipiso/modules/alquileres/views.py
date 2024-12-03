@@ -18,6 +18,7 @@ from django.utils.timezone import now
 from datetime import datetime
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from djanfo.contrib.sites.models import Site
 logger = logging.getLogger(__name__)
 
 
