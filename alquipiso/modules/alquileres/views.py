@@ -465,8 +465,7 @@ def stripe_webhook(request):
                             cliente_email_message.attach(image)
 
                     # Ajustar el HTML para referenciar la imagen inline
-                    body_with_image = body.replace('{{ image_url }}', 'cid:alojamiento_image')
-                    cliente_email_message.attach_alternative(body_with_image, "text/html")
+                    cliente_email_message.attach_alternative(body, "text/html")
 
                     cliente_email_message.send()
 
@@ -493,8 +492,7 @@ def stripe_webhook(request):
                             propietario_email_message.attach(image)
 
                     # Ajustar el HTML para referenciar la imagen inline
-                    body_with_image = body.replace('{{ image_url }}', 'cid:alojamiento_image')
-                    propietario_email_message.attach_alternative(body_with_image, "text/html")
+                    propietario_email_message.attach_alternative(body, "text/html")
 
                     propietario_email_message.send()
 
