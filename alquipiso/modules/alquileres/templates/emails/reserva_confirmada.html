@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+        .alojamiento-info {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .alojamiento-img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>¡Reserva Confirmada!</h1>
+    </div>
+    <div class="content">
+        <p>Hola,</p>
+        <p>Tu reserva ha sido confirmada exitosamente. Aquí están los detalles:</p>
+        <div class="alojamiento-info">
+            <h2>{{ alojamiento.nombre }}</h2>
+            <img src="{{ alojamiento.imagen }}" alt="Foto del alojamiento" class="alojamiento-img">
+            <p><strong>Dirección:</strong> {{ alojamiento.direccion }}</p>
+            <p><strong>Fechas:</strong> {{ reserva.fecha_entrada }} - {{ reserva.fecha_salida }}</p>
+            <p><strong>Precio total:</strong> {{ reserva.precio_total }} €</p>
+        </div>
+        <p>Puedes ver los detalles de tu reserva <a href="{{ reserva_link }}">aquí</a>.</p>
+    </div>
+    <div class="footer">
+        <p>Gracias por reservar con nosotros.</p>
+        <p>AlquiPiso</p>
+    </div>
+</body>
+</html>
