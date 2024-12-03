@@ -1,4 +1,5 @@
 import base64
+from email.mime.image import MIMEImage
 import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
@@ -423,10 +424,17 @@ def stripe_webhook(request):
                     )
                     cliente_email_message.attach_alternative(body, "text/html")
 
-                    # Adjuntar la imagen al correo
+                    # Adjuntar la imagen inline (CID)
                     if os.path.exists(image_path):
-                        cliente_email_message.attach_file(image_path)
+                        with open(image_path, 'rb') as img_file:
+                            image = MIMEImage(img_file.read())
+                            image.add_header('Content-ID', '<alojamiento_image>')  # Identificador único
+                            cliente_email_message.attach(image)
 
+                    # Ajustar el HTML para referenciar la imagen inline
+                    body_with_image = body.replace('{{ image_url }}', 'cid:alojamiento_image')
+                    cliente_email_message.attach_alternative(body_with_image, "text/html")
+                    
                     cliente_email_message.send()
 
                 # Correo para el propietario
@@ -444,8 +452,16 @@ def stripe_webhook(request):
                     propietario_email_message.attach_alternative(body, "text/html")
 
                     # Adjuntar la imagen al correo
+                    # Adjuntar la imagen inline (CID)
                     if os.path.exists(image_path):
-                        propietario_email_message.attach_file(image_path)
+                        with open(image_path, 'rb') as img_file:
+                            image = MIMEImage(img_file.read())
+                            image.add_header('Content-ID', '<alojamiento_image>')  # Identificador único
+                            propietario_email_message.attach(image)
+
+                    # Ajustar el HTML para referenciar la imagen inline
+                    body_with_image = body.replace('{{ image_url }}', 'cid:alojamiento_image')
+                    propietario_email_message.attach_alternative(body_with_image, "text/html")
 
                     propietario_email_message.send()
 
