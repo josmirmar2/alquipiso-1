@@ -138,6 +138,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 LOGIN_REDIRECT_URL = 'alquileres:index'  # or the desired URL to redirect after login
+LOGIN_URL = 'alquileres:login'
 
 # URL for serving media files in development
 MEDIA_URL = '/media/'

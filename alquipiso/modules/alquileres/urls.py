@@ -1,4 +1,7 @@
 from django.urls import path
+
+from django.conf import settings
+from django.conf.urls.static import static
 from . import views
 
 app_name = 'alquileres' 
@@ -42,4 +45,4 @@ urlpatterns = [
     path('register/', views.register, name='register'),  # Registro de usuario
     path('login/', views.login_view, name='login'),  # Inicio de sesión
     path('logout/', views.logout_view, name='logout'),  # Cierre de sesión
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
