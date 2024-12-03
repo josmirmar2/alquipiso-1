@@ -32,10 +32,22 @@ class UserRegistrationForm(forms.Form):
         return cleaned_data
     
 
+from django import forms
+from .models import Alojamiento
+
 class AlojamientoForm(forms.ModelForm):
     class Meta:
         model = Alojamiento
         fields = ['nombre', 'direccion', 'ciudad', 'descripcion', 'precio', 'imagen']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del Alojamiento'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección'}),
+            'ciudad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ciudad'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Descripción del Alojamiento', 'rows': 3}),
+            'precio': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Precio por Noche (€)'}),
+            'imagen': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+
 
 
 class ReservaForm(forms.ModelForm):
@@ -46,6 +58,7 @@ class ReservaForm(forms.ModelForm):
             'fecha_entrada': forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'id': 'fecha_entrada'}),
             'fecha_salida': forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'id': 'fecha_salida'}),
         }
+
 
     precio_total = forms.FloatField(required=False, disabled=True, label="Precio Total")
 
@@ -117,17 +130,17 @@ class ReservaForm(forms.ModelForm):
 
 class UserEditForm(forms.ModelForm):
     current_password = forms.CharField(
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         required=False,
         label='Contraseña actual'
     )
     new_password = forms.CharField(
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         required=False,
         label='Nueva contraseña'
     )
     confirm_new_password = forms.CharField(
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         required=False,
         label='Confirmar nueva contraseña'
     )
@@ -135,6 +148,11 @@ class UserEditForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['email', 'first_name', 'last_name']
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')  # Pasamos el usuario actual para validar la contraseña
@@ -170,6 +188,10 @@ class UserEditForm(forms.ModelForm):
         # Guardar los cambios del usuario
         user = super().save(commit=False)
 
+        new_email = self.cleaned_data.get('email')
+        if new_email and new_email != user.email:
+            user.username = new_email
+
         # Cambiar la contraseña si se proporciona una nueva
         new_password = self.cleaned_data.get('new_password')
         if new_password:
@@ -178,3 +200,23 @@ class UserEditForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class EditAlojamientoForm(forms.ModelForm):
+    class Meta:
+        model = Alojamiento
+        fields = ['nombre', 'direccion', 'ciudad', 'descripcion', 'precio', 'imagen']
+        widgets = {
+            'descripcion': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
+            'precio': forms.NumberInput(attrs={'step': '0.01'})
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Personalizar campos si es necesario (ej. agregar clases CSS)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
+        self.fields['ciudad'].widget.attrs.update({'class': 'form-control'})
+        self.fields['descripcion'].widget.attrs.update({'class': 'form-control'})
+        self.fields['precio'].widget.attrs.update({'class': 'form-control'})
+        self.fields['imagen'].widget.attrs.update({'class': 'form-control'})

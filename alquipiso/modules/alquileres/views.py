@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from alquipiso import settings
-from .forms import AlojamientoForm, UserRegistrationForm, ReservaForm, UserEditForm
+from .forms import AlojamientoForm, EditAlojamientoForm, UserRegistrationForm, ReservaForm, UserEditForm
 from .models import Cliente, Propietario, Notificacion
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
@@ -33,12 +33,18 @@ from modules.alquileres.models import *
 
 
 def index(request):
+
+    if request.user.is_authenticated:
+        # Si el usuario es un propietario, redirigir a su lista de alojamientos
+        if hasattr(request.user, 'propietario'):
+            return redirect('alquileres:list_alojamientos_propietario', propietario_id=request.user.propietario.id)
+
     ciudad = request.GET.get('ciudad', '')
     fecha_entrada = request.GET.get('fecha_entrada', '')
     fecha_salida = request.GET.get('fecha_salida', '')
 
     # Obtener todos los alojamientos si no hay filtros
-    alojamientos = Alojamiento.objects.all()
+    alojamientos = Alojamiento.objects.all().filter(activo=True)
 
     # Filtrar por ciudad si es que se proporcionó
     if ciudad:
@@ -115,9 +121,32 @@ def list_alojamientos(request):
     alojamientos = Alojamiento.objects.all()
     return render(request, 'list_alojamientos.html', {'alojamientos': alojamientos})
 
-def show_alojamiento(request, alojamiento_id):
-    alojamiento = get_object_or_404(Alojamiento, pk=alojamiento_id)
-    return render(request, 'show_alojamiento.html', {'alojamiento': alojamiento})
+def delete_alojamiento(request, alojamiento_id):
+    alojamiento = get_object_or_404(Alojamiento, id=alojamiento_id)
+
+    # Verificar si el usuario tiene permiso
+    if request.user != alojamiento.propietario.user:
+        messages.error(request, "No tienes permiso para eliminar este alojamiento.")
+        return redirect('alquileres:index')
+    
+    # Buscar reservas futuras o activas
+    reservas_pendientes = alojamiento.reserva_set.filter(fecha_entrada__gte=now())
+    
+    if reservas_pendientes.exists():
+        # Si hay reservas activas o futuras, no permitir la eliminación
+        messages.error(request, "No se puede eliminar este alojamiento porque tiene reservas pendientes.")
+        
+        # Desactivar el alojamiento para que no se puedan hacer nuevas reservas
+        alojamiento.activo = False
+        alojamiento.save()
+        
+        return redirect('alquileres:list_alojamientos_propietario', propietario_id=request.user.propietario.id)
+    
+    # Si no hay reservas pendientes, eliminar el alojamiento
+    alojamiento.delete()
+    messages.success(request, "Alojamiento eliminado con éxito.")
+    return redirect('alquileres:list_alojamientos_propietario', propietario_id=request.user.propietario.id)
+
 
 def list_alojamientos_propietario(request, propietario_id):
     if not hasattr(request.user, 'propietario'):
@@ -259,6 +288,10 @@ def create_alojamiento(request):
 def create_reserva(request, alojamiento_id):
     # Obtener el alojamiento de la base de datos
     alojamiento = get_object_or_404(Alojamiento, id=alojamiento_id)
+
+    if alojamiento.activo == False:
+        messages.error(request, "No puedes reservar un alojamiento desactivado.")
+        return redirect('alquileres:index')
 
     if request.method == 'POST':
         form = ReservaForm(request.POST)
@@ -434,7 +467,7 @@ def stripe_webhook(request):
                     # Ajustar el HTML para referenciar la imagen inline
                     body_with_image = body.replace('{{ image_url }}', 'cid:alojamiento_image')
                     cliente_email_message.attach_alternative(body_with_image, "text/html")
-                    
+
                     cliente_email_message.send()
 
                 # Correo para el propietario
@@ -595,3 +628,16 @@ def user_profile(request):
         form = UserEditForm(instance=request.user, user=request.user)
 
     return render(request, 'user_profile.html', {'form': form})
+
+def edit_alojamiento(request, alojamiento_id):
+    alojamiento = get_object_or_404(Alojamiento, id=alojamiento_id)
+
+    if request.method == 'POST':
+        form = EditAlojamientoForm(request.POST, request.FILES, instance=alojamiento)
+        if form.is_valid():
+            form.save()
+            return redirect('alquileres:edit_alojamiento', alojamiento_id=alojamiento.id)
+    else:
+        form = EditAlojamientoForm(instance=alojamiento)
+
+    return render(request, 'show_alojamiento.html', {'form': form, 'alojamiento': alojamiento})

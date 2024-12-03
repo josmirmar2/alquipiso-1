@@ -6,18 +6,36 @@
 {% endblock title %}
 
 {% block content %}
-    <div class="container mt-5">
-        <h1>Reservas de {{ alojamiento.nombre }}</h1>
-        <ul class="list-group">
-            {% for reserva in reservas %}
-                <li class="list-group-item">
-                    <p><strong>Cliente:</strong> {{ reserva.cliente.user.username }}</p>
-                    <p><strong>Fechas:</strong> {{ reserva.fecha_entrada }} - {{ reserva.fecha_salida }}</p>
-                    <p><strong>Pagado:</strong> {{ reserva.pagado|yesno:"Sí,No" }}</p>
-                </li>
-            {% empty %}
-                <li class="list-group-item">No hay reservas para este alojamiento.</li>
-            {% endfor %}
-        </ul>
+<div class="container mt-5">
+    <h1 class="text-center text-primary mb-4">Reservas de {{ alojamiento.nombre }}</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            {% if reservas %}
+                <div class="list-group">
+                    {% for reserva in reservas %}
+                        <div class="list-group-item mb-4 p-3 shadow-sm rounded d-flex flex-column flex-md-row align-items-start">
+                            <!-- Información de la reserva -->
+                            <div class="flex-grow-1">
+                                <h5><strong>Cliente:</strong> {{ reserva.cliente.user.username }}</h5>
+                                <p class="mb-1"><strong>Fechas:</strong> {{ reserva.fecha_entrada }} - {{ reserva.fecha_salida }}</p>
+                                <p class="mb-1"><strong>Precio Total:</strong> {{ reserva.precio_total }} €</p>
+                                <p class="mb-1">
+                                    <strong>Pagado:</strong>
+                                    <span class="badge {% if reserva.pagado %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ reserva.pagado|yesno:"Sí,No" }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-warning text-center shadow-sm" role="alert">
+                    No hay reservas para este alojamiento.
+                </div>
+            {% endif %}
+        </div>
     </div>
+</div>
 {% endblock content %}

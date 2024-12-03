@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Editar {{ alojamiento.nombre }}</title>
+{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center text-primary mb-4">Editar {{ alojamiento.nombre }}</h1>
+
+    <div class="row justify-content-center">
+        <!-- Imagen del alojamiento -->
+        <div class="col-md-6 mb-4">
+            {% if alojamiento.imagen %}
+                <img src="{{ alojamiento.imagen.url }}" class="img-fluid rounded shadow-lg mb-4" alt="Imagen de {{ alojamiento.nombre }}">
+            {% else %}
+                <div class="text-muted text-center py-5 border rounded bg-light">
+                    <p>No hay imagen disponible para este alojamiento.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Card para el formulario de edición -->
+    <div class="card mx-auto" style="max-width: 800px;">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Mensajes de error si los hay -->
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- Campos del formulario -->
+                <div class="mb-3">
+                    <label for="id_nombre" class="form-label">Nombre del Alojamiento</label>
+                    {{ form.nombre }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_direccion" class="form-label">Dirección</label>
+                    {{ form.direccion }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_ciudad" class="form-label">Ciudad</label>
+                    {{ form.ciudad }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_descripcion" class="form-label">Descripción</label>
+                    {{ form.descripcion }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_precio" class="form-label">Precio por noche (€)</label>
+                    {{ form.precio }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_imagen" class="form-label">Cambiar Imagen</label>
+                    {{ form.imagen }}
+                </div>
+
+                <!-- Botón para guardar los cambios -->
+                <div class="d-flex justify-content-center mb-3">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+
+            <!-- Formulario separado para eliminar el alojamiento -->
+            <div class="d-flex justify-content-center mb-3">
+                <form method="post" action="{% url 'alquileres:delete_alojamiento' alojamiento.id %}" class="d-inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Eliminar Alojamiento</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock content %}

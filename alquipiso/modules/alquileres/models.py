@@ -12,8 +12,9 @@ class Alojamiento(models.Model):
     ciudad = models.CharField(max_length=100)
     descripcion = models.TextField()
     precio = models.FloatField()
-    imagen = models.ImageField(upload_to='media', null=True, blank=True)
+    imagen = models.ImageField(upload_to='', null=True, blank=True)
     propietario = models.ForeignKey('Propietario', on_delete=models.CASCADE, related_name='alojamientos')
+    activo = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

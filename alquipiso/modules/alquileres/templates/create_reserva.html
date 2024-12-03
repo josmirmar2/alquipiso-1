@@ -1,33 +1,36 @@
 {% extends 'base.html' %}
 
 {% block title %}
-<title>Reserva - {{ alojamiento.nombre }}</title>
-{% endblock %}
+    <title>Reserva - {{ alojamiento.nombre }}</title>
+{% endblock title %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center">Reserva para el alojamiento: {{ alojamiento.nombre }}</h2>
+    <!-- Título de la reserva -->
+    <h2 class="text-center mb-5 text-primary">Reserva para el alojamiento: {{ alojamiento.nombre }}</h2>
 
-    <div class="row text-center" style="margin-top:25px">
-        <div class="col-md-6">
+    <div class="row mb-4">
+        <!-- Columna de imagen del alojamiento -->
+        <div class="col-md-6 d-flex justify-content-center">
             {% if alojamiento.imagen %}
-                <img src="{{ alojamiento.imagen.url }}" class="img-fluid rounded" alt="Imagen de {{ alojamiento.nombre }}">
+                <img src="{{ alojamiento.imagen.url }}" class="img-fluid rounded shadow-lg" alt="Imagen de {{ alojamiento.nombre }}">
             {% endif %}
         </div>
-        <div class="col-md-6" style="margin-top:12vh">
-            <p><strong>Dirección:</strong> {{ alojamiento.direccion }}</p>
-            <p><strong>Ciudad:</strong> {{ alojamiento.ciudad }}</p>
-            <p><strong>Descripción:</strong> {{ alojamiento.descripcion }}</p>
-            <p><strong>Precio:</strong> ${{ alojamiento.precio }} por noche</p>
-        </div>
-    </div>
 
-    <form method="post">
+        <!-- Columna de detalles del alojamiento -->
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4 rounded">
+                <p><i class="bi bi-geo-alt"></i><strong>  Dirección:</strong> {{ alojamiento.direccion }}, {{ alojamiento.ciudad }}</p>
+                <p><i class="bi bi-file-earmark-text"></i><strong>  Descripción:</strong> {{ alojamiento.descripcion }}</p>
+                <p><i class="bi bi-currency-euro"></i><strong>  Precio:</strong> ${{ alojamiento.precio }} por noche</p>
+            </div>
+            <!-- Formulario de reserva -->
+    <form method="post" class="card shadow-sm p-4 rounded">
         {% csrf_token %}
-
+        
         <!-- Mensajes de error generales del formulario -->
         {% if form.non_field_errors %}
-        <div class="alert alert-danger">
+        <div class="alert alert-danger mb-4">
             <ul>
                 {% for error in form.non_field_errors %}
                 <li>{{ error }}</li>
@@ -35,12 +38,11 @@
             </ul>
         </div>
         {% endif %}
-
-        <!-- Formulario de reserva -->
-        <div class="form-group">
+    
+        <!-- Fecha de entrada -->
+        <div class="form-group mb-4">
             <label for="fecha_entrada">Fecha de entrada:</label>
             {{ form.fecha_entrada }}
-            <!-- Mostrar errores de fecha_entrada -->
             {% if form.fecha_entrada.errors %}
             <div class="text-danger">
                 {% for error in form.fecha_entrada.errors %}
@@ -49,11 +51,11 @@
             </div>
             {% endif %}
         </div>
-
-        <div class="form-group">
+    
+        <!-- Fecha de salida -->
+        <div class="form-group mb-4">
             <label for="fecha_salida">Fecha de salida:</label>
             {{ form.fecha_salida }}
-            <!-- Mostrar errores de fecha_salida -->
             {% if form.fecha_salida.errors %}
             <div class="text-danger">
                 {% for error in form.fecha_salida.errors %}
@@ -62,15 +64,20 @@
             </div>
             {% endif %}
         </div>
-
-        <!-- Campo para mostrar el precio total calculado (solo lectura) -->
+    
+        <!-- Precio Total -->
         <div class="form-group mt-3">
             <label for="precio_total">Precio Total</label>
             <input type="text" class="form-control" id="precio_total" value="0.00" readonly>
         </div>
-
-        <button type="submit" class="btn btn-primary" style="margin-top:1vh">Confirmar Reserva</button>
+    
+        <!-- Botón de confirmación -->
+        <button type="submit" class="btn btn-success btn-block mt-4">Confirmar Reserva</button>
     </form>
+        </div>
+    </div>
+
+    
 </div>
 
 <script>
@@ -103,4 +110,5 @@
     document.getElementById('fecha_entrada').addEventListener('change', calcularPrecio);
     document.getElementById('fecha_salida').addEventListener('change', calcularPrecio);
 </script>
+
 {% endblock %}

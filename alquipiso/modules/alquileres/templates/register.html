@@ -4,129 +4,69 @@
     <title>Registro - Alquipiso</title>
 {% endblock title %}
 
-{% block extra_css %}
-    <style>
-        /* Estilos generales */
-        body {
-            background-color: #f8f9fa;  /* Fondo gris claro para todo el cuerpo */
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Centrar el contenedor del formulario */
-        .register-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;  /* Asegura que el contenedor ocupe toda la altura de la pantalla */
-            padding: 0 20px;  /* Espacio lateral */
-        }
-
-        /* Estilo para la tarjeta del formulario */
-        .register-card {
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 450px;  /* Controla el ancho máximo del formulario */
-            margin: 0 auto;  /* Asegura que la tarjeta esté centrada */
-        }
-
-        .register-card h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        /* Estilos para los campos del formulario */
-        .form-control {
-            border-radius: 8px;
-            height: 45px;
-            font-size: 16px;
-            padding: 10px;  /* Agregar espacio interno a los inputs */
-            width: 100%;  /* Asegura que los inputs no se expandan más allá del contenedor */
-            margin-bottom: 20px;  /* Espacio entre los campos */
-        }
-
-        /* Estilo para el botón de enviar */
-        .btn-primary {
-            width: 100%;
-            height: 45px;
-            font-size: 16px;
-            border-radius: 8px;
-        }
-
-        /* Mensaje de error */
-        .alert {
-            border-radius: 8px;
-            margin-bottom: 20px;  /* Espacio debajo del mensaje de error */
-        }
-
-        /* Estilo para el enlace de login */
-        .login-link {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-
-        .login-link a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-
-    </style>
-{% endblock extra_css %}
-
 {% block content %}
-    <div class="register-container">
-        <div class="register-card" style="display:flex; flex-direction:column; align-items:center; align-self:center; margin-top:2vh">
-            <h2>Registro</h2>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow-lg p-4" style="width: 100%; max-width: 500px; border-radius: 12px;">
+            <h2 class="text-center mb-4">Registro</h2>
 
             <!-- Mostrar los mensajes de error si existen -->
             {% if messages %}
                 <div class="alert alert-danger">
                     {% for message in messages %}
-                        <p>{{ message }}</p>
+                        <p class="mb-0">{{ message }}</p>
                     {% endfor %}
                 </div>
             {% endif %}
 
             <!-- Formulario de registro -->
-            <form method="POST" style="display:flex; flex-direction:column; align-items:center">
+            <form method="POST">
                 {% csrf_token %}
-                <label for="id_email" class="form-label">Email</label>
-                <input type="email" name="email" maxlength="320" required id="id_email" class="form-control"/>
+                
+                <div class="mb-3">
+                    <label for="id_email" class="form-label">Correo electrónico</label>
+                    <input type="email" name="email" id="id_email" class="form-control" placeholder="Ingresa tu correo" required />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_nombre" class="form-label">Nombre</label>
+                    <input type="text" name="nombre" id="id_nombre" class="form-control" placeholder="Ingresa tu nombre" required />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_apellido" class="form-label">Apellidos</label>
+                    <input type="text" name="apellido" id="id_apellido" class="form-control" placeholder="Ingresa tus apellidos" required />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_telefono" class="form-label">Teléfono</label>
+                    <input type="text" name="telefono" id="id_telefono" class="form-control" placeholder="Ingresa tu teléfono" required />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_password" class="form-label">Contraseña</label>
+                    <input type="password" name="password" id="id_password" class="form-control" placeholder="Crea una contraseña" required />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_confirm_password" class="form-label">Confirmar contraseña</label>
+                    <input type="password" name="confirm_password" id="id_confirm_password" class="form-control" placeholder="Confirma tu contraseña" required />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_role" class="form-label">Selecciona tu rol</label>
+                    <select name="role" id="id_role" class="form-select" required>
+                        <option value="" selected disabled>Elige una opción</option>
+                        <option value="cliente">Cliente</option>
+                        <option value="propietario">Propietario</option>
+                    </select>
+                </div>
 
-                <label for="id_nombre" class="form-label">Nombre</label>
-                <input type="text" name="nombre" maxlength="100" required id="id_nombre" class="form-control"/>
-
-                <label for="id_apellido" class="form-label">Apellido</label>
-                <input type="text" name="apellido" maxlength="100" required id="id_apellido" class="form-control"/>
-                
-                <label for="id_telefono" class="form-label">Telefono</label>
-                <input type="text" name="telefono" maxlength="100" required id="id_telefono" class="form-control"/>
-                
-                <label for="id_password" class="form-label">Password</label>
-                <input type="password" name="password" required id="id_password" class="form-control"/>
-                
-                <label for="id_confirm_password" class="form-label">Confirm Password</label>
-                <input type="password" name="confirm_password" required id="id_confirm_password" class="form-control"/>
-                
-                <label for="id_role" class="form-label">Role</label>
-                <select name="role" id="id_role"class="form-control">
-                    <option value="cliente">Cliente</option>
-                    <option value="propietario">Propietario</option>
-                </select>
-                <button type="submit" class="btn btn-primary" style="margin-top:2vh">Registrar</button>
+                <button type="submit" class="btn btn-primary w-100 py-2">Registrar</button>
             </form>
 
             <!-- Enlace para loguearse si ya tienen cuenta -->
-            <div class="login-link">
-                <p>¿Tienes cuenta? <a href="{% url 'alquileres:login' %}">Inicia sesión aquí</a></p>
+            <div class="text-center mt-3">
+                <p class="mb-0">¿Ya tienes cuenta? <a href="{% url 'alquileres:login' %}">Inicia sesión aquí</a></p>
             </div>
         </div>
     </div>

@@ -1,4 +1,3 @@
-<!-- templates/alquileres/create_alojamiento.html -->
 {% extends 'base.html' %}
 
 {% block title %}
@@ -7,13 +6,69 @@
 
 {% block content %}
     <div class="container mt-5">
-        <h1>Agregar un nuevo Alojamiento</h1>
+        <h1 class="text-center mb-4">Agregar un Nuevo Alojamiento</h1>
 
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form.as_p }}
+        <!-- Card para el formulario -->
+        <div class="card mx-auto" style="max-width: 600px;">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Mostrar errores de formulario -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <ul>
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
 
-            <button type="submit" class="btn btn-primary">Guardar Alojamiento</button>
-        </form>
+                    <!-- Nombre del Alojamiento -->
+                    <div class="mb-3">
+                        <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre del Alojamiento</label>
+                        {{ form.nombre }}
+                    </div>
+
+                    <!-- Dirección -->
+                    <div class="mb-3">
+                        <label for="{{ form.direccion.id_for_label }}" class="form-label">Dirección</label>
+                        {{ form.direccion }}
+                    </div>
+
+                    <!-- Ciudad -->
+                    <div class="mb-3">
+                        <label for="{{ form.ciudad.id_for_label }}" class="form-label">Ciudad</label>
+                        {{ form.ciudad }}
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="mb-3">
+                        <label for="{{ form.descripcion.id_for_label }}" class="form-label">Descripción</label>
+                        {{ form.descripcion }}
+                    </div>
+
+                    <!-- Precio -->
+                    <div class="mb-3">
+                        <label for="{{ form.precio.id_for_label }}" class="form-label">Precio por Noche (€)</label>
+                        {{ form.precio }}
+                    </div>
+
+                    <!-- Imagen -->
+                    <div class="mb-3">
+                        <label for="{{ form.imagen.id_for_label }}" class="form-label">Imagen</label>
+                        {{ form.imagen}}
+                    </div>
+
+                    <!-- Botón de Enviar -->
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary">Guardar Alojamiento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 {% endblock %}

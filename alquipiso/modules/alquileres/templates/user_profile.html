@@ -4,105 +4,72 @@
 <title>Editar Perfil - AlquiPiso</title>
 {% endblock title %}
 
-{% block extra_css %}
-<style>
-    .profile-container {
-        max-width: 600px;
-        margin: 0 auto;
-        background-color: #f9f9f9;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .profile-container h1 {
-        text-align: center;
-        margin-bottom: 20px;
-        font-size: 1.8rem;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-control {
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        padding: 10px;
-    }
-
-    .btn-save {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        width: 100%;
-        padding: 10px;
-        border-radius: 5px;
-        font-weight: bold;
-        text-align: center;
-        margin-top: 20px;
-    }
-
-    .btn-save:hover {
-        background-color: #0056b3;
-        color: #fff;
-    }
-
-    .error-list {
-        color: #d9534f;
-        margin-bottom: 15px;
-    }
-</style>
-{% endblock extra_css %}
-
 {% block content %}
 <div class="container mt-5">
-    <div class="profile-container">
-        <h1>Editar Perfil</h1>
-        <form method="post">
-            {% csrf_token %}
-            
-            {% if form.errors %}
-                <ul class="error-list">
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    {% endfor %}
-                    {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+    <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+        <div class="card-body">
+            <h1 class="text-center text-primary mb-4">Editar Perfil</h1>
 
-            <div class="form-group">
-                <label for="id_email">Correo Electrónico</label>
-                {{ form.email }}
-            </div>
-            <div class="form-group">
-                <label for="id_first_name">Nombre</label>
-                {{ form.first_name }}
-            </div>
-            <div class="form-group">
-                <label for="id_last_name">Apellido</label>
-                {{ form.last_name }}
-            </div>
-            <hr>
-            <div class="form-group">
-                <label for="id_current_password">Contraseña Actual</label>
-                {{ form.current_password }}
-            </div>
-            <div class="form-group">
-                <label for="id_new_password">Nueva Contraseña</label>
-                {{ form.new_password }}
-            </div>
-            <div class="form-group">
-                <label for="id_confirm_new_password">Confirmar Nueva Contraseña</label>
-                {{ form.confirm_new_password }}
-            </div>
+            <form method="post">
+                {% csrf_token %}
 
-            <button type="submit" class="btn btn-save">Guardar Cambios</button>
-        </form>
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="id_email" class="form-label">Correo Electrónico</label>
+                    {{ form.email }}
+                </div>
+
+                <!-- Nombre -->
+                <div class="mb-3">
+                    <label for="id_first_name" class="form-label">Nombre</label>
+                    {{ form.first_name }}
+                </div>
+
+                <!-- Apellido -->
+                <div class="mb-3">
+                    <label for="id_last_name" class="form-label">Apellido</label>
+                    {{ form.last_name }}
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Contraseña Actual -->
+                <div class="mb-3">
+                    <label for="id_current_password" class="form-label">Contraseña Actual</label>
+                    {{ form.current_password }}
+                </div>
+
+                <!-- Nueva Contraseña -->
+                <div class="mb-3">
+                    <label for="id_new_password" class="form-label">Nueva Contraseña</label>
+                    {{ form.new_password }}
+                </div>
+
+                <!-- Confirmar Nueva Contraseña -->
+                <div class="mb-3">
+                    <label for="id_confirm_new_password" class="form-label">Confirmar Nueva Contraseña</label>
+                    {{ form.confirm_new_password }}
+                </div>
+
+                <!-- Botón Guardar -->
+                <button type="submit" class="btn btn-primary w-100 py-2">Guardar Cambios</button>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock content %}

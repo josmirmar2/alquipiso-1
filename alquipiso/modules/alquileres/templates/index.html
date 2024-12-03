@@ -1,79 +1,14 @@
 {% extends 'base.html' %}
 
 {% block title %}
-<title>Inicio - AlquiPiso</title>
+    <title>Inicio - AlquiPiso</title>
 {% endblock title %}
-
-{% block extra_css %}
-<style>
-    .card-deck {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-        justify-content: center;
-    }
-
-    .card {
-        width: 100%; /* Adjusted to take full width of the column */
-        height: 300px; /* Set a fixed height for uniformity */
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s;
-        margin-bottom: 1.5rem; /* Added margin for separation */
-    }
-
-    .card:hover {
-        transform: scale(1.03);
-    }
-
-    .card-img-top {
-        width: 100%; /* Set to 100% to fill the card width */
-        height: 200px; /* Fixed height for uniformity */
-        object-fit: cover; /* Ensures the image covers the area */
-        border-radius: 8px 8px 0 0; /* Rounded corners for the top */
-        display: block;
-    }
-
-    .card-body {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        height: 100%;
-    }
-
-    .card-title {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #333;
-    }
-
-    .card-text {
-        color: #555;
-    }
-
-    .btn-reserve {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        width: 100%;
-        padding: 10px;
-        border-radius: 5px;
-        font-weight: bold;
-        text-align: center;
-    }
-
-    .btn-reserve:hover {
-        background-color: #0056b3;
-        color: #fff;
-    }
-</style>
-{% endblock extra_css %}
 
 {% block content %}
 <div class="container mt-5">
-    <h1 style="align-self:end">{{ welcome_text }}</h1>
+    <h1 class="text-center mb-4">{{ welcome_text }}</h1>
 
-    <!-- Mostrar mensajes de error si los campos no están completos -->
+    <!-- Mensajes de error si existen -->
     {% if messages %}
         <div class="alert alert-danger">
             {% for message in messages %}
@@ -82,34 +17,49 @@
         </div>
     {% endif %}
 
-    <!-- Formulario de búsqueda -->
-    <form method="get" action="{% url 'alquileres:index' %}" class="search-form">
-        <div class="d-flex">
-            <input type="text" name="ciudad" placeholder="Ciudad" class="form-control" value="{{ request.GET.ciudad }}">
-            <input type="date" name="fecha_entrada" placeholder="Fecha de Entrada" class="form-control" value="{{ request.GET.fecha_entrada }}">
-            <input type="date" name="fecha_salida" placeholder="Fecha de Salida" class="form-control" value="{{ request.GET.fecha_salida }}">
-            <button type="submit" class="btn btn-primary">Buscar</button>
+    <!-- Formulario de búsqueda dentro de una Card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Buscar Alojamiento</h5>
+            <form method="get" action="{% url 'alquileres:index' %}">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <input type="text" name="ciudad" placeholder="Ciudad" class="form-control" value="{{ request.GET.ciudad }}">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" name="fecha_entrada" class="form-control" value="{{ request.GET.fecha_entrada }}">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" name="fecha_salida" class="form-control" value="{{ request.GET.fecha_salida }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                    </div>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 
+    <!-- Tarjetas de alojamientos -->
     <div class="row">
         {% for alojamiento in alojamientos %}
-        <div class="col-md-6">
-            <div class="card border-dark mb-3"
-                style = "width: 100%; height: 525px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform 0.2s;
-        margin-bottom: 1.5rem; /* Added margin for separation */">
-                <img src="{{ alojamiento.imagen.url }}" class="card-img-top" alt="Imagen de {{ alojamiento.nombre }}"
-                    style = "width: 100%; height: 350px; object-fit: cover; border-radius: 8px 8px 0 0; display: block;">
-                <div class="card-body">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="{{ alojamiento.imagen.url }}" class="card-img-top" alt="Imagen de {{ alojamiento.nombre }}" style="height: 250px; object-fit: cover;">
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">{{ alojamiento.nombre }}</h5>
-                    <p class="card-text">{{ alojamiento.direccion }}, {{ alojamiento.ciudad }}</p>
-                    <p class="card-text"><strong>Precio por noche:</strong> ${{ alojamiento.precio }}</p>
-                    <a href="{% if user.is_authenticated %}{% url 'alquileres:create_reserva' alojamiento.id %}{% else %}{% url 'alquileres:login' %}{% endif %}" class="btn btn-primary">Reservar</a>
+                    <p class="card-text text-muted mb-1">{{ alojamiento.direccion }}, {{ alojamiento.ciudad }}</p>
+                    <p class="card-text"><strong>Precio por noche:</strong> {{ alojamiento.precio }}€</p>
+                    <div class="mt-auto">
+                        <a href="{% if user.is_authenticated %}{% url 'alquileres:create_reserva' alojamiento.id %}{% else %}{% url 'alquileres:login' %}{% endif %}" class="btn btn-primary w-100">Reservar</a>
+                    </div>
                 </div>
             </div>
         </div>
         {% empty %}
-        <p>No hay alojamientos disponibles en este momento.</p>
+        <div class="col-12">
+            <p class="text-center">No hay alojamientos disponibles en este momento.</p>
+        </div>
         {% endfor %}
     </div>
 </div>

@@ -1,43 +1,70 @@
 {% extends 'base.html' %}
 
 {% block title %}
-<title>Detalles de la Reserva</title>
+    <title>Detalles de la Reserva</title>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Detalles de la Reserva</h2>
+    <h2 class="text-center mb-5 text-primary">Detalles de la Reserva</h2>
 
-    <p><strong>Alojamiento:</strong> {{ reserva.alojamiento.nombre }}</p>
-    <p><strong>Fecha de entrada:</strong> {{ reserva.fecha_entrada }}</p>
-    <p><strong>Fecha de salida:</strong> {{ reserva.fecha_salida }}</p>
-    <p><strong>Precio Total:</strong> {{ reserva.precio_total }} €</p>
+    <!-- Imagen del alojamiento -->
+    <div class="row mb-4">
+        <div class="col-md-6 d-flex justify-content-center">
+            {% if reserva.alojamiento.imagen %}
+                <img src="{{ reserva.alojamiento.imagen.url }}" class="img-fluid rounded shadow-lg" alt="Imagen de {{ reserva.alojamiento.nombre }}">
+            {% endif %}
+        </div>
 
-    {% if not reserva.pagado %}
-    <button id="checkout-button" class="btn btn-primary">Pagar con Stripe</button>
-    {% else %}
-    <p>Esta reserva ya ha sido pagada.</p>
-    {% endif %}
+        <!-- Detalles de la reserva y botones -->
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4 rounded mb-4">
+                <p><strong>{{ reserva.alojamiento.nombre }}</strong></p>
+                <p><strong>Fecha de entrada:</strong> {{ reserva.fecha_entrada }}</p>
+                <p><strong>Fecha de salida:</strong> {{ reserva.fecha_salida }}</p>
+                <p><strong>Precio Total:</strong> {{ reserva.precio_total }} €</p>
+                {% if reserva.pagado %}
+                    <p class="text-success">Esta reserva ya ha sido pagada.</p>
+                {% else %}
+                    <p class="text-danger">Esta reserva está pendiente de pago.</p>
+                {% endif %}
+            </div>
 
-    {% if not reserva.pagado %}
-    <form method="post" action="{% url 'alquileres:delete_reserva' reserva.id %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Borrar Reserva</button>
-    </form>
-    {% else %}
-    {% if reserva.fecha_entrada|date:"Y-m-d" > "now"|date:"Y-m-d" %}
-    <form method="post" action="{% url 'alquileres:delete_reserva' reserva.id %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Cancelar Reserva</button>
-    </form>
-    {% else %}
-    <p>Esta reserva no se puede cancelar, ya que la fecha de entrada está muy próxima.</p>
-    {% endif %}
-    {% endif %}
+            <!-- Botones alineados horizontalmente con una pequeña separación -->
+            <div class="d-flex justify-content-center mb-4">
+                <!-- Botón Pagar (solo si no ha sido pagado) -->
+                {% if not reserva.pagado %}
+                    <button id="checkout-button" class="btn btn-success btn-lg mr-3">Pagar</button> <!-- Añadido margen a la derecha -->
+                {% endif %}
+
+                <!-- Botón Cancelar -->
+                <div>
+                    {% if not reserva.pagado %}
+                        <form method="post" action="{% url 'alquileres:delete_reserva' reserva.id %}" class="d-inline-block">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-lg ml-3">Cancelar</button> <!-- Añadido margen a la izquierda -->
+                        </form>
+                    {% else %}
+                        {% if reserva.fecha_entrada|date:"Y-m-d" > "now"|date:"Y-m-d" %}
+                            <form method="post" action="{% url 'alquileres:delete_reserva' reserva.id %}" class="d-inline-block">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-lg">Cancelar Reserva</button>
+                            </form>
+                        {% else %}
+                            <p class="text-muted">Esta reserva no se puede cancelar, ya que la fecha de entrada está muy próxima.</p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Mensajes de información -->
     {% if messages %}
     <div class="alert alert-info">
         {% for message in messages %}
-            <p>{{ message }}</p>
+        <p>{{ message }}</p>
         {% endfor %}
     </div>
     {% endif %}

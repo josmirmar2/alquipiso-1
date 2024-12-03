@@ -1,4 +1,3 @@
-<!-- templates/list_alojamientos.html -->
 {% extends 'base.html' %}
 
 {% block title %}
@@ -7,33 +6,56 @@
 
 {% block content %}
     <div class="container mt-5">
-        <h1>Alojamientos</h1>
 
-        {% if user.is_authenticated %}
-            {% if user.propietario %}
-                <!-- Mostrar botón para añadir alojamiento solo si es propietario -->
-                <a href="{% url 'alquileres:create_alojamiento' %}" class="btn btn-success mb-3">Añadir Alojamiento</a>
-            {% endif %}
+        {% if messages %}
+        <div class="alert alert-info">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+        </div>
+{% endif %}
+        <!-- Título principal -->
+        <h1 class="text-center text-primary mb-4">Alojamientos</h1>
+
+        <!-- Botón para añadir alojamiento (solo para propietarios) -->
+        {% if user.is_authenticated and user.propietario %}
+            <div class="text-center mb-4">
+                <a href="{% url 'alquileres:create_alojamiento' %}" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Añadir Alojamiento
+                </a>
+            </div>
         {% endif %}
 
+        <!-- Lista de alojamientos -->
         <div class="row">
             {% for alojamiento in alojamientos %}
-                <div class="col-md-6 mb-4">
-                    <div class="card">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card shadow-sm">
+                        <!-- Imagen del alojamiento -->
                         {% if alojamiento.imagen %}
-                            <img src="{{ alojamiento.imagen.url }}" class="card-img-top" alt="{{ alojamiento.nombre }}">
+                            <img src="{{ alojamiento.imagen.url }}" class="card-img-top" 
+                                 alt="Imagen de {{ alojamiento.nombre }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <img src="https://via.placeholder.com/350x200" class="card-img-top" 
+                                 alt="Imagen no disponible" style="height: 200px; object-fit: cover;">
                         {% endif %}
+
+                        <!-- Cuerpo de la tarjeta -->
                         <div class="card-body">
-                            <h3 class="card-title">{{ alojamiento.nombre }}</h3>
-                            <p class="card-text">{{ alojamiento.descripcion }}</p>
-                            <div class="d-flex justify-content-between">
-                                <!-- Botón Ver Detalles -->
-                                <a href="{% url 'alquileres:show_alojamiento' alojamiento_id=alojamiento.id %}" 
-                                   class="btn btn-primary">Ver Detalles</a>
-                                <!-- Botón Reservas del Alojamiento -->
-                                <a href="{% url 'alquileres:list_reservas_alojamiento' alojamiento_id=alojamiento.id %}" 
-                                   class="btn btn-secondary">Reservas del alojamiento</a>
-                            </div>
+                            <h5 class="card-title text-truncate">{{ alojamiento.nombre }}</h5>
+                            <p class="card-text text-muted">{{ alojamiento.descripcion|truncatechars:100 }}</p>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="card-footer bg-light d-flex justify-content-between">
+                            <a href="{% url 'alquileres:edit_alojamiento' alojamiento_id=alojamiento.id %}" 
+                               class="btn btn-primary btn-sm">
+                                <i class="bi bi-info-circle"></i> Ver Detalles
+                            </a>
+                            <a href="{% url 'alquileres:list_reservas_alojamiento' alojamiento_id=alojamiento.id %}" 
+                               class="btn btn-secondary btn-sm">
+                                <i class="bi bi-calendar-check"></i> Reservas
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -41,3 +63,4 @@
         </div>
     </div>
 {% endblock content %}
+

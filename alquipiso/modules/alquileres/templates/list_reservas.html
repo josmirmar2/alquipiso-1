@@ -1,54 +1,75 @@
-<!-- templates/list_reservas.html -->
 {% extends 'base.html' %}
 
 {% block title %}
-    <title>Reservas</title>
+    <title>Mis Reservas</title>
 {% endblock title %}
 
 {% block content %}
-    <div class="container mt-5">
-        {% if messages %}
-            <div class="alert alert-success">
+<div class="container mt-5">
+    <!-- Título -->
+    <h1 class="text-center mb-4">Mis Reservas</h1>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        <div class="alert alert-success">
             {% for message in messages %}
                 <p>{{ message }}</p>
             {% endfor %}
-            </div>
-        {% endif %}
-        <h1>Reservas</h1>
+        </div>
+    {% endif %}
 
-        <!-- Reservas pagadas -->
-        <h2>Pagadas</h2>
-        <ul class="list-group mb-4">
+    <!-- Reservas Pagadas -->
+    <h2 class="mb-3">Pagadas</h2>
+    {% if reservas|length > 0 %}
+        <div class="list-group">
             {% for reserva in reservas %}
                 {% if reserva.pagado %}
-                    <li class="list-group-item">
-                        <a href="{% url 'alquileres:detalles_reserva' reserva.id %}">
-                            Reserva #{{ reserva.id }} - {{ reserva.fecha_entrada }} al {{ reserva.fecha_salida }}
-                        </a>
-                        <p>Alojamiento: {{ reserva.alojamiento.nombre }}</p>
-                    </li>
+                    <div class="list-group-item d-flex align-items-center shadow-sm mb-3">
+                        <!-- Imagen pequeña -->
+                        <img src="{{ reserva.alojamiento.imagen.url }}" alt="Imagen de {{ reserva.alojamiento.nombre }}" 
+                             class="rounded" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
+                        <!-- Información de la reserva -->
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">{{ reserva.alojamiento.nombre }}</h5>
+                            <p class="mb-1 text-muted">{{ reserva.alojamiento.direccion }}, {{ reserva.alojamiento.ciudad }}</p>
+                            <p class="mb-1"><strong>Fechas:</strong> {{ reserva.fecha_entrada }} - {{ reserva.fecha_salida }}</p>
+                            <p class="mb-1"><strong>Total Pagado:</strong> {{ reserva.precio_total }}€</p>
+                        </div>
+                        <!-- Botón de acción -->
+                        <a href="{% url 'alquileres:detalles_reserva' reserva.id %}" class="btn btn-primary btn-sm">Ver Detalles</a>
+                    </div>
                 {% endif %}
-            {% empty %}
-                <li class="list-group-item">No hay reservas pagadas.</li>
             {% endfor %}
-        </ul>
+        </div>
+    {% else %}
+        <p class="text-muted">No hay reservas pagadas.</p>
+    {% endif %}
 
-        <!-- Reservas pendientes de pago -->
-        <h2>Pendientes de pago</h2>
-        <ul class="list-group">
+    <!-- Reservas Pendientes de Pago -->
+    <h2 class="mt-5 mb-3">Pendientes de Pago</h2>
+    {% if reservas|length > 0 %}
+        <div class="list-group">
             {% for reserva in reservas %}
                 {% if not reserva.pagado %}
-                    <li class="list-group-item">
-                        <a href="{% url 'alquileres:detalles_reserva' reserva.id %}">
-                            Reserva #{{ reserva.id }} - {{ reserva.fecha_entrada }} al {{ reserva.fecha_salida }}
-                        </a>
-                        <p>Alojamiento: {{ reserva.alojamiento.nombre }}</p>
-                    </li>
+                    <div class="list-group-item d-flex align-items-center shadow-sm mb-3">
+                        <!-- Imagen pequeña -->
+                        <img src="{{ reserva.alojamiento.imagen.url }}" alt="Imagen de {{ reserva.alojamiento.nombre }}" 
+                             class="rounded" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
+                        <!-- Información de la reserva -->
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">{{ reserva.alojamiento.nombre }}</h5>
+                            <p class="mb-1 text-muted">{{ reserva.alojamiento.direccion }}, {{ reserva.alojamiento.ciudad }}</p>
+                            <p class="mb-1"><strong>Fechas:</strong> {{ reserva.fecha_entrada }} - {{ reserva.fecha_salida }}</p>
+                            <p class="mb-1"><strong>Total:</strong> {{ reserva.precio_total }}€</p>
+                        </div>
+                        <!-- Botón de acción -->
+                        <a href="{% url 'alquileres:detalles_reserva' reserva.id %}" class="btn btn-warning btn-sm">Pagar Ahora</a>
+                    </div>
                 {% endif %}
-            {% empty %}
-                <li class="list-group-item">No hay reservas pendientes de pago.</li>
             {% endfor %}
-        </ul>
-
-    </div>
+        </div>
+    {% else %}
+        <p class="text-muted">No hay reservas pendientes de pago.</p>
+    {% endif %}
+</div>
 {% endblock content %}
