@@ -141,6 +141,8 @@ LOGIN_REDIRECT_URL = 'alquileres:index'  # or the desired URL to redirect after 
 
 # URL for serving media files in development
 MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # The absolute filesystem path to the directory where media files will be stored
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
