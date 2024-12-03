@@ -1,3 +1,5 @@
+import base64
+import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -398,22 +400,20 @@ def stripe_webhook(request):
                 reserva.save()
 
                 alojamiento = reserva.alojamiento
-                reserva_link = f"{request.scheme}://{request.get_host()}/reserva/{reserva.id}/"
-                image_url = f"{request.scheme}://{request.get_host()}{alojamiento.imagen.url.replace('/media', '')}"
-                print(f"Imagen URL completa: {image_url}")
+                reserva_link = f"{request.scheme}://{request.get_host()}/alquileres/reserva/{reserva.id}/"
+                image_path = alojamiento.imagen.path  # Ruta absoluta de la imagen
+
                 # Datos para el correo
                 context = {
                     'alojamiento': alojamiento,
                     'reserva': reserva,
                     'reserva_link': reserva_link,
-                    'image_url': image_url,
                 }
 
                 # Correo para el cliente
                 if cliente_email:
                     subject = 'Confirmación de Reserva'
                     body = render_to_string('emails/reserva_confirmada.html', context)
-                    print(body)
 
                     cliente_email_message = EmailMultiAlternatives(
                         subject=subject,
@@ -422,6 +422,11 @@ def stripe_webhook(request):
                         to=[cliente_email],
                     )
                     cliente_email_message.attach_alternative(body, "text/html")
+
+                    # Adjuntar la imagen al correo
+                    if os.path.exists(image_path):
+                        cliente_email_message.attach_file(image_path)
+
                     cliente_email_message.send()
 
                 # Correo para el propietario
@@ -437,6 +442,11 @@ def stripe_webhook(request):
                         to=[propietario_email],
                     )
                     propietario_email_message.attach_alternative(body, "text/html")
+
+                    # Adjuntar la imagen al correo
+                    if os.path.exists(image_path):
+                        propietario_email_message.attach_file(image_path)
+
                     propietario_email_message.send()
 
                 # Crear notificación para el cliente y propietario tras pago exitoso
@@ -447,6 +457,7 @@ def stripe_webhook(request):
                 Notificacion.objects.create(recipiente=reserva.alojamiento.propietario.user, mensaje=propietario_mensaje)
 
     return JsonResponse({'status': 'success'})
+
 
 
 @login_required
