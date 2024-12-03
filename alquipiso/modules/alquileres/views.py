@@ -171,7 +171,7 @@ def register(request):
             telefono = form.cleaned_data['telefono']
             password = form.cleaned_data['password']
             role = form.cleaned_data['role']
-            
+
             # Verificar si el correo ya está registrado
             if User.objects.filter(email=email).exists():
                 messages.error(request, 'El correo electrónico ya está registrado.')
@@ -182,7 +182,7 @@ def register(request):
             user.first_name = nombre
             user.last_name = apellido
             user.save()
-            
+
             # Crear el cliente o propietario según la elección
             if role == UserRegistrationForm.CLIENTE:
                 cliente = Cliente.objects.create(user=user, telefono=telefono)
@@ -191,7 +191,7 @@ def register(request):
 
             # Iniciar sesión automáticamente
             login(request, user)
-            
+
             # Redirigir a la página de inicio o a donde quieras
             return redirect('index')
     else:
@@ -207,7 +207,7 @@ def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        
+
         # Verifica que los campos no estén vacíos
         if not username or not password:
             messages.error(request, 'Por favor ingresa tanto el nombre de usuario como la contraseña.')
@@ -215,7 +215,7 @@ def login_view(request):
 
         # Autenticar al usuario
         user = authenticate(request, username=username, password=password)
-        
+
         if user is not None:
             # Si la autenticación es exitosa, iniciar sesión y redirigir
             login(request, user)
@@ -223,7 +223,7 @@ def login_view(request):
         else:
             # Si la autenticación falla, mostrar mensaje de error
             messages.error(request, 'Credenciales inválidas. Intenta de nuevo.')
-    
+
     # Si no es una solicitud POST, simplemente muestra la página de login
     return render(request, 'login.html')
 
@@ -253,7 +253,7 @@ def create_alojamiento(request):
 def create_reserva(request, alojamiento_id):
     # Obtener el alojamiento de la base de datos
     alojamiento = get_object_or_404(Alojamiento, id=alojamiento_id)
-    
+
     if request.method == 'POST':
         form = ReservaForm(request.POST)
         form.instance.alojamiento = alojamiento  # Asignar el alojamiento al formulario
@@ -270,11 +270,11 @@ def create_reserva(request, alojamiento_id):
             propietario = alojamiento.propietario.user
             mensaje = f"Se ha realizado una nueva reserva para su alojamiento '{alojamiento.nombre}' del {reserva.fecha_entrada} al {reserva.fecha_salida}."
             Notificacion.objects.create(recipiente=propietario, mensaje=mensaje)
-            
+
             # Crear notificación para el cliente
             mensaje_cliente = f"Ha realizado una reserva en el alojamiento '{alojamiento.nombre}' del {reserva.fecha_entrada} al {reserva.fecha_salida}."
             Notificacion.objects.create(recipiente=request.user, mensaje=mensaje_cliente)
-            
+
             # Redirigir a la página de detalles de la reserva
             return redirect('alquileres:detalles_reserva', reserva_id=reserva.id)  # Redirigir a la vista de detalles de la reserva
     else:
@@ -286,7 +286,7 @@ def create_reserva(request, alojamiento_id):
 def detalles_reserva(request, reserva_id):
     # Obtener la reserva de la base de datos
     reserva = get_object_or_404(Reserva, id=reserva_id)
-    
+
     # Pasar la clave pública de Stripe desde settings
     stripe_public_key = settings.STRIPE_PUBLIC_KEY  # Asegúrate de tener esta configuración en tu settings.py
 
@@ -299,7 +299,7 @@ def detalles_reserva(request, reserva_id):
 def procesar_pago(request, reserva_id):
     # Obtener el modelo de la reserva
     reserva = get_object_or_404(Reserva, id=reserva_id)
-    
+
     if request.method == 'POST':
         try:
             # Crear una sesión de Stripe Checkout
@@ -328,7 +328,7 @@ def procesar_pago(request, reserva_id):
             return JsonResponse({'url': session.url})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-    
+
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def pago_exitoso(request):
@@ -396,12 +396,15 @@ def stripe_webhook(request):
 
                 alojamiento = reserva.alojamiento
                 reserva_link = f"{request.scheme}://{request.get_host()}/reservas/{reserva.id}/"
+                current_site = Site.objects.get_current()
+                image_url = f"https://{current_site.domain}{alojamiento.imagen.url}"
 
                 # Datos para el correo
                 context = {
                     'alojamiento': alojamiento,
                     'reserva': reserva,
                     'reserva_link': reserva_link,
+                    'image_url': image_url,
                 }
 
                 # Correo para el cliente
@@ -433,12 +436,12 @@ def stripe_webhook(request):
                     propietario_email_message.attach_alternative(body, "text/html")
                     propietario_email_message.send()
 
-        # Crear notificación para el cliente y propietario tras pago exitoso
-        cliente_mensaje = f"El pago de su reserva en '{reserva.alojamiento.nombre}' ha sido exitoso."
-        Notificacion.objects.create(recipiente=request.user, mensaje=cliente_mensaje)
+                # Crear notificación para el cliente y propietario tras pago exitoso
+                cliente_mensaje = f"El pago de su reserva en '{reserva.alojamiento.nombre}' ha sido exitoso."
+                Notificacion.objects.create(recipiente=reserva.cliente.user, mensaje=cliente_mensaje)
 
-        propietario_mensaje = f"El cliente ha pagado la reserva en su alojamiento '{reserva.alojamiento.nombre}' del {reserva.fecha_entrada} al {reserva.fecha_salida}."
-        Notificacion.objects.create(recipiente=reserva.alojamiento.propietario.user, mensaje=propietario_mensaje)
+                propietario_mensaje = f"El cliente ha pagado la reserva en su alojamiento '{reserva.alojamiento.nombre}' del {reserva.fecha_entrada} al {reserva.fecha_salida}."
+                Notificacion.objects.create(recipiente=reserva.alojamiento.propietario.user, mensaje=propietario_mensaje)
 
     return JsonResponse({'status': 'success'})
 
@@ -460,7 +463,7 @@ def delete_reserva(request, reserva_id):
         dias_para_inicio = (reserva.fecha_entrada - now().date()).days
         if dias_para_inicio <= 30:
             messages.error(
-                request, 
+                request,
                 "No puedes cancelar esta reserva porque faltan menos de 30 días para su inicio."
             )
             return redirect('alquileres:detalles_reserva', reserva_id=reserva.id)
@@ -487,7 +490,7 @@ def marcar_notificaciones_como_leidas(request):
     if request.method == 'POST':
         # Marcar todas las notificaciones no leídas del usuario como leídas
         notificaciones_actualizadas = Notificacion.objects.filter(recipiente=request.user, leido=False).update(leido=True)
-        
+
         # Verificar si se actualizaron notificaciones
         if notificaciones_actualizadas > 0:
             return JsonResponse({'status': 'success', 'message': 'Notificaciones marcadas como leídas'})
@@ -516,7 +519,7 @@ def vista_con_notificaciones(request):
 def validar_fechas_disponibles(fecha_entrada, fecha_salida, ciudad):
     # Filtramos alojamientos por ciudad
     alojamientos = Alojamiento.objects.filter(ciudad__iexact=ciudad)
-    
+
     # Convertir las fechas de entrada y salida a datetime.date para evitar problemas de comparación
     if isinstance(fecha_entrada, datetime):
         fecha_entrada = fecha_entrada.date()  # Convertimos a datetime.date

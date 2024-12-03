@@ -41,7 +41,7 @@
         <p>Tu reserva ha sido confirmada exitosamente. Aquí están los detalles:</p>
         <div class="alojamiento-info">
             <h2>{{ alojamiento.nombre }}</h2>
-            <img src="{{ alojamiento.imagen.url }}" alt="Foto del alojamiento" class="alojamiento-img">
+            <img src="{{ imagen_url }}" alt="Foto del alojamiento" class="alojamiento-img">
             <p><strong>Dirección:</strong> {{ alojamiento.direccion }}</p>
             <p><strong>Fechas:</strong> {{ reserva.fecha_entrada }} - {{ reserva.fecha_salida }}</p>
             <p><strong>Precio total:</strong> {{ reserva.precio_total }} €</p>
