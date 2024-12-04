@@ -205,10 +205,11 @@ class UserEditForm(forms.ModelForm):
 class EditAlojamientoForm(forms.ModelForm):
     class Meta:
         model = Alojamiento
-        fields = ['nombre', 'direccion', 'ciudad', 'descripcion', 'precio', 'imagen']
+        fields = ['nombre', 'direccion', 'ciudad', 'descripcion', 'precio', 'imagen', 'activo']
         widgets = {
             'descripcion': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
-            'precio': forms.NumberInput(attrs={'step': '0.01'})
+            'precio': forms.NumberInput(attrs={'step': '1.00'}),
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'})
         }
 
     def __init__(self, *args, **kwargs):

@@ -20,25 +20,23 @@
 
     <!-- Reservas Pagadas -->
     <h2 class="mb-3">Pagadas</h2>
-    {% if reservas|length > 0 %}
+    {% if reservas_pagadas %}
         <div class="list-group">
-            {% for reserva in reservas %}
-                {% if reserva.pagado %}
-                    <div class="list-group-item d-flex align-items-center shadow-sm mb-3">
-                        <!-- Imagen pequeña -->
-                        <img src="{{ reserva.alojamiento.imagen.url }}" alt="Imagen de {{ reserva.alojamiento.nombre }}" 
-                             class="rounded" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
-                        <!-- Información de la reserva -->
-                        <div class="flex-grow-1">
-                            <h5 class="mb-1">{{ reserva.alojamiento.nombre }}</h5>
-                            <p class="mb-1 text-muted">{{ reserva.alojamiento.direccion }}, {{ reserva.alojamiento.ciudad }}</p>
-                            <p class="mb-1"><strong>Fechas:</strong> {{ reserva.fecha_entrada }} - {{ reserva.fecha_salida }}</p>
-                            <p class="mb-1"><strong>Total Pagado:</strong> {{ reserva.precio_total }}€</p>
-                        </div>
-                        <!-- Botón de acción -->
-                        <a href="{% url 'alquileres:detalles_reserva' reserva.id %}" class="btn btn-primary btn-sm">Ver Detalles</a>
+            {% for reserva in reservas_pagadas %}
+                <div class="list-group-item d-flex align-items-center shadow-sm mb-3">
+                    <!-- Imagen pequeña -->
+                    <img src="{{ reserva.alojamiento.imagen.url }}" alt="Imagen de {{ reserva.alojamiento.nombre }}" 
+                         class="rounded" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
+                    <!-- Información de la reserva -->
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">{{ reserva.alojamiento.nombre }}</h5>
+                        <p class="mb-1 text-muted">{{ reserva.alojamiento.direccion }}, {{ reserva.alojamiento.ciudad }}</p>
+                        <p class="mb-1"><strong>Fechas:</strong> {{ reserva.fecha_entrada }} - {{ reserva.fecha_salida }}</p>
+                        <p class="mb-1"><strong>Total Pagado:</strong> {{ reserva.precio_total }}€</p>
                     </div>
-                {% endif %}
+                    <!-- Botón de acción -->
+                    <a href="{% url 'alquileres:detalles_reserva' reserva.id %}" class="btn btn-primary btn-sm">Ver Detalles</a>
+                </div>
             {% endfor %}
         </div>
     {% else %}
@@ -47,29 +45,60 @@
 
     <!-- Reservas Pendientes de Pago -->
     <h2 class="mt-5 mb-3">Pendientes de Pago</h2>
-    {% if reservas|length > 0 %}
+    {% if reservas_pendientes %}
         <div class="list-group">
-            {% for reserva in reservas %}
-                {% if not reserva.pagado %}
-                    <div class="list-group-item d-flex align-items-center shadow-sm mb-3">
-                        <!-- Imagen pequeña -->
-                        <img src="{{ reserva.alojamiento.imagen.url }}" alt="Imagen de {{ reserva.alojamiento.nombre }}" 
-                             class="rounded" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
-                        <!-- Información de la reserva -->
-                        <div class="flex-grow-1">
-                            <h5 class="mb-1">{{ reserva.alojamiento.nombre }}</h5>
-                            <p class="mb-1 text-muted">{{ reserva.alojamiento.direccion }}, {{ reserva.alojamiento.ciudad }}</p>
-                            <p class="mb-1"><strong>Fechas:</strong> {{ reserva.fecha_entrada }} - {{ reserva.fecha_salida }}</p>
-                            <p class="mb-1"><strong>Total:</strong> {{ reserva.precio_total }}€</p>
-                        </div>
-                        <!-- Botón de acción -->
-                        <a href="{% url 'alquileres:detalles_reserva' reserva.id %}" class="btn btn-warning btn-sm">Pagar Ahora</a>
+            {% for reserva in reservas_pendientes %}
+                <div class="list-group-item d-flex align-items-center shadow-sm mb-3">
+                    <!-- Imagen pequeña -->
+                    <img src="{{ reserva.alojamiento.imagen.url }}" alt="Imagen de {{ reserva.alojamiento.nombre }}" 
+                         class="rounded" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
+                    <!-- Información de la reserva -->
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">{{ reserva.alojamiento.nombre }}</h5>
+                        <p class="mb-1 text-muted">{{ reserva.alojamiento.direccion }}, {{ reserva.alojamiento.ciudad }}</p>
+                        <p class="mb-1"><strong>Fechas:</strong> {{ reserva.fecha_entrada }} - {{ reserva.fecha_salida }}</p>
+                        <p class="mb-1"><strong>Total:</strong> {{ reserva.precio_total }}€</p>
                     </div>
-                {% endif %}
+                    <!-- Botón de acción -->
+                    <a href="{% url 'alquileres:detalles_reserva' reserva.id %}" class="btn btn-warning btn-sm">Pagar Ahora</a>
+                </div>
             {% endfor %}
         </div>
     {% else %}
-        <p class="text-muted">No hay reservas pendientes de pago.</p>
+        <!-- Mensaje cuando no hay reservas pendientes de pago -->
+        <div class="d-flex justify-content-center align-items-center">
+            <div class="text-center">
+                <!-- Icono de FontAwesome -->
+                <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No tienes reservas pendientes de pago</h4>
+                <p class="text-muted">¡Todo está al día! Disfruta de tu tiempo.</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Reservas Anteriores -->
+    <h2 class="mt-5 mb-3">Reservas Anteriores</h2>
+    {% if reservas_anteriores %}
+        <div class="list-group">
+            {% for reserva in reservas_anteriores %}
+                <div class="list-group-item d-flex align-items-center shadow-sm mb-3">
+                    <!-- Imagen pequeña -->
+                    <img src="{{ reserva.alojamiento.imagen.url }}" alt="Imagen de {{ reserva.alojamiento.nombre }}" 
+                         class="rounded" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
+                    <!-- Información de la reserva -->
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">{{ reserva.alojamiento.nombre }}</h5>
+                        <p class="mb-1 text-muted">{{ reserva.alojamiento.direccion }}, {{ reserva.alojamiento.ciudad }}</p>
+                        <p class="mb-1"><strong>Fechas:</strong> {{ reserva.fecha_entrada }} - {{ reserva.fecha_salida }}</p>
+                        <p class="mb-1"><strong>Total Pagado:</strong> {{ reserva.precio_total }}€</p>
+                    </div>
+                    <!-- Botón de acción -->
+                    <a href="{% url 'alquileres:detalles_reserva' reserva.id %}" class="btn btn-secondary btn-sm">Ver Detalles</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">No hay reservas anteriores.</p>
     {% endif %}
 </div>
 {% endblock content %}

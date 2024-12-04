@@ -1,4 +1,3 @@
-<!-- templates/edit_alojamiento.html -->
 {% extends 'base.html' %}
 
 {% block title %}
@@ -6,56 +5,94 @@
 {% endblock title %}
 
 {% block content %}
-    <div class="container mt-5">
-        <h1>Editar Alojamiento</h1>
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            <!-- Nombre -->
-            <div class="form-group mb-3">
-                <label for="nombre">Nombre</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" value="{{ form.nombre.value }}" required>
-            </div>
+<div class="container mt-5">
+    <h1 class="text-center text-primary mb-4">Editar {{ alojamiento.nombre }}</h1>
 
-            <!-- Dirección -->
-            <div class="form-group mb-3">
-                <label for="direccion">Dirección</label>
-                <input type="text" class="form-control" id="direccion" name="direccion" value="{{ form.direccion.value }}" required>
-            </div>
-
-            <!-- Ciudad -->
-            <div class="form-group mb-3">
-                <label for="ciudad">Ciudad</label>
-                <input type="text" class="form-control" id="ciudad" name="ciudad" value="{{ form.ciudad.value }}" required>
-            </div>
-
-            <!-- Descripción -->
-            <div class="form-group mb-3">
-                <label for="descripcion">Descripción</label>
-                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required>{{ form.descripcion.value }}</textarea>
-            </div>
-
-            <!-- Precio -->
-            <div class="form-group mb-3">
-                <label for="precio">Precio por noche</label>
-                <input type="number" class="form-control" id="precio" name="precio" value="{{ form.precio.value }}" step="0.01" required>
-            </div>
-
-            <!-- Imagen -->
-            <div class="form-group mb-3">
-                <label for="imagen">Imagen</label>
-                <input type="file" class="form-control" id="imagen" name="imagen">
-                {% if alojamiento.imagen %}
-                    <p class="mt-2">Imagen actual:</p>
-                    <img src="{{ alojamiento.imagen.url }}" alt="Imagen de {{ alojamiento.nombre }}" class="img-thumbnail" style="max-width: 200px;">
-                {% endif %}
-            </div>
-
-            <!-- Botones -->
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                <a href="{% url 'alquileres:show_alojamiento' alojamiento.id %}" class="btn btn-secondary">Cancelar</a>
-            </div>
-        </form>
+    <div class="row justify-content-center">
+        <!-- Imagen del alojamiento -->
+        <div class="col-md-6 mb-4">
+            {% if alojamiento.imagen %}
+                <img src="{{ alojamiento.imagen.url }}" class="img-fluid rounded shadow-lg mb-4" alt="Imagen de {{ alojamiento.nombre }}">
+            {% else %}
+                <div class="text-muted text-center py-5 border rounded bg-light">
+                    <p>No hay imagen disponible para este alojamiento.</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
+
+    <!-- Card para el formulario de edición -->
+    <div class="card mx-auto" style="max-width: 800px;">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Mensajes de error si los hay -->
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- Campos del formulario -->
+                <div class="mb-3">
+                    <label for="id_nombre" class="form-label">Nombre del Alojamiento</label>
+                    {{ form.nombre }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_direccion" class="form-label">Dirección</label>
+                    {{ form.direccion }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_ciudad" class="form-label">Ciudad</label>
+                    {{ form.ciudad }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_descripcion" class="form-label">Descripción</label>
+                    {{ form.descripcion }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_precio" class="form-label">Precio por noche (€)</label>
+                    {{ form.precio }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_imagen" class="form-label">Cambiar Imagen</label>
+                    {{ form.imagen }}
+                </div>
+
+                <!-- Activo -->
+                <div class="form-check form-switch mb-4">
+                    <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                           {% if form.activo.value %}checked{% endif %}>
+                    <label class="form-check-label" for="activo">¿Activo?</label>
+                </div>
+
+                <!-- Botón para guardar los cambios -->
+                <div class="d-flex justify-content-center mb-3">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i>  Guardar Cambios</button>
+                </div>
+            </form>
+
+            <!-- Formulario separado para eliminar el alojamiento -->
+            <div class="d-flex justify-content-center mb-3">
+                <form method="post" action="{% url 'alquileres:delete_alojamiento' alojamiento.id %}" class="d-inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i>  Eliminar Alojamiento</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
 {% endblock content %}

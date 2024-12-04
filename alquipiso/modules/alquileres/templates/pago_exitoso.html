@@ -1,9 +1,26 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container mt-5">
-        <h2>¡Pago realizado con éxito!</h2>
-        <p>Gracias por tu compra. Tu pago ha sido procesado correctamente.</p>
-        <p><a href="{% url 'index' %}">Volver al inicio</a></p>
+<div class="container my-5 d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="card text-center shadow-lg border-0" style="max-width: 600px;">
+        <div class="card-body p-5">
+            <!-- Icono o GIF de éxito -->
+            <div class="mb-4">
+                <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWV6b2JtZHZtaWJ5Mjg1OWFiMXcwejdpNDM5ZDluZTJtbDd3eGFraiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/x4O0fjpQfoBZS/giphy.gif" alt="Pago exitoso" class="img-fluid" style="max-width: 250px; border-radius: 15px;">
+            </div>
+            
+            
+            <!-- Título de éxito -->
+            <h2 class="text-success mb-3"><i class="bi bi-check-circle"></i> ¡Pago realizado con éxito!</h2>
+            
+            <!-- Mensaje de confirmación -->
+            <p class="mb-4 text-muted">Gracias por tu compra. Tu pago ha sido procesado correctamente.</p>
+            
+            <!-- Botón para volver al inicio -->
+            <a href="{% url 'index' %}" class="btn btn-primary px-4 py-2">
+                <i class="bi bi-house-door"></i> Volver al inicio
+            </a>
+        </div>
     </div>
-{% endblock %}
+</div>
+{% endblock content %}

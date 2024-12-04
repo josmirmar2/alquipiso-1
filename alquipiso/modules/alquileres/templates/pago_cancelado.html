@@ -2,8 +2,23 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Pago Cancelado</h2>
-    <p>El pago fue cancelado. Puede intentarlo nuevamente accediendo a "Mis reservas" y viendo las reservas "Pendientes de pago".</p>
-    <p><a href="{% url 'index' %}">Volver al inicio</a></p>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title mb-0"><i class="bi bi-x-circle"></i> Pago Cancelado</h3>
+                </div>
+                <div class="card-body p-4">
+                    <p class="lead">El pago fue cancelado. Puede intentarlo nuevamente accediendo a <strong>"Mis reservas"</strong> y viendo las reservas <strong>"Pendientes de pago"</strong>.</p>
+                    <div class="d-flex justify-content-center mb-4">
+                        <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExYThrc2I3c2pvcmx3amt4cGR4MnF4djJxdDBpemlzbG1pNGh2aGo3ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/yIxNOXEMpqkqA/giphy.gif" alt="Pago exitoso" class="img-fluid" style="max-width: 250px; border-radius: 15px;">
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <p><a href="{% url 'index' %}" class="btn btn-secondary"><i class="bi bi-house-door"></i> Volver al inicio</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock content %}

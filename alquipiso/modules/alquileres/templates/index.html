@@ -23,7 +23,7 @@
             <h5 class="card-title">Buscar Alojamiento</h5>
             <form method="get" action="{% url 'alquileres:index' %}">
                 <div class="row g-2">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <input type="text" name="ciudad" placeholder="Ciudad" class="form-control" value="{{ request.GET.ciudad }}">
                     </div>
                     <div class="col-md-3">
@@ -34,6 +34,9 @@
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                    </div>
+                    <div class="col-md-1">
+                        <a href="{% url 'alquileres:index' %}" class="btn btn-secondary w-100">Limpiar</a>
                     </div>
                 </div>
             </form>
@@ -64,3 +67,4 @@
     </div>
 </div>
 {% endblock content %}
+

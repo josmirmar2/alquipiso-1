@@ -62,33 +62,33 @@ def index(request):
             alojamientos_disponibles = []
 
             for alojamiento in alojamientos:
-                # Consultamos las reservas existentes para ese alojamiento
-                reservas_existentes = Reserva.objects.filter(alojamiento=alojamiento)
+                # Consultamos las reservas existentes para ese alojamiento (solo las pagadas)
+                reservas_existentes = Reserva.objects.filter(alojamiento=alojamiento, pagado=True)
 
                 disponible = True
                 for reserva in reservas_existentes:
-                    # Caso 1: La búsqueda está completamente dentro de una reserva existente
-                    if fecha_entrada >= reserva.fecha_entrada and fecha_salida <= reserva.fecha_salida:
-                        disponible = False
-                        break
-
-                    # Caso 2: La reserva existente está completamente dentro de las fechas de la búsqueda
+                    # Caso 1: Las fechas de la reserva pagada engloban a otra reserva existente
                     if fecha_entrada <= reserva.fecha_entrada and fecha_salida >= reserva.fecha_salida:
                         disponible = False
                         break
-
-                    # Caso 3: La fecha de entrada de la búsqueda está dentro del rango de una reserva existente
+                    
+                    # Caso 2: Las fechas de otra reserva existente engloban las fechas de la reserva pagada
+                    if fecha_entrada >= reserva.fecha_entrada and fecha_salida <= reserva.fecha_salida:
+                        disponible = False
+                        break
+                    
+                    # Caso 3: La fecha de entrada de la reserva pagada está dentro de las fechas de otra reserva
                     if fecha_entrada >= reserva.fecha_entrada and fecha_entrada < reserva.fecha_salida:
                         disponible = False
                         break
-
-                    # Caso 4: La fecha de salida de la búsqueda está dentro del rango de una reserva existente
+                    
+                    # Caso 4: La fecha de salida de la reserva pagada está dentro de las fechas de otra reserva
                     if fecha_salida > reserva.fecha_entrada and fecha_salida <= reserva.fecha_salida:
                         disponible = False
                         break
-
-                    # Caso 5: Las fechas de la búsqueda son exactamente iguales a una reserva existente
-                    if fecha_entrada == reserva.fecha_entrada and fecha_salida == reserva.fecha_salida:
+                    
+                    # Caso 5: Las fechas se solapan parcial o completamente
+                    if fecha_entrada < reserva.fecha_salida and fecha_salida > reserva.fecha_entrada:
                         disponible = False
                         break
 
@@ -184,9 +184,23 @@ def show_reserva(request, reserva_id):
     return render(request, 'show_reserva.html', {'reserva': reserva})
 
 def list_reservas_cliente(request, cliente_id):
-    cliente = Cliente.objects.get(pk=cliente_id)
-    reservas = Reserva.objects.filter(cliente=cliente)
-    return render(request, 'list_reservas.html', {'reservas': reservas})
+    reservas = Reserva.objects.filter(cliente_id=cliente_id)
+    
+    # Filtrar reservas pagadas
+    reservas_pagadas = reservas.filter(pagado=True, fecha_salida__gte=timezone.now())
+
+    # Filtrar reservas pendientes de pago (pagado=False)
+    reservas_pendientes = reservas.filter(pagado=False)
+    
+    # Filtrar reservas anteriores (ya ocurridas)
+    reservas_anteriores = reservas.filter(fecha_salida__lt=timezone.now())
+
+    return render(request, 'list_reservas.html', {
+        'reservas_pagadas': reservas_pagadas,
+        'reservas_pendientes': reservas_pendientes,
+        'reservas_anteriores': reservas_anteriores,
+        'today': timezone.now(),
+    })
 
 def list_reservas_alojamiento(request, alojamiento_id):
     alojamiento = Alojamiento.objects.get(pk=alojamiento_id)
@@ -384,18 +398,18 @@ def edit_alojamiento(request, alojamiento_id):
     # Verificar que el usuario autenticado sea el propietario del alojamiento
     if request.user != alojamiento.propietario.user:
         messages.error(request, "No tienes permiso para editar este alojamiento.")
-        return redirect('alquileres:show_alojamiento', alojamiento_id=alojamiento_id)
+        return redirect('alquileres:list_alojamientos_propietario', propietario_id=alojamiento.propietario.id)
 
     if request.method == 'POST':
-        form = AlojamientoForm(request.POST, request.FILES, instance=alojamiento)
+        form = EditAlojamientoForm(request.POST, request.FILES, instance=alojamiento)
         if form.is_valid():
             form.save()
             messages.success(request, "Alojamiento actualizado con éxito.")
-            return redirect('alquileres:show_alojamiento', alojamiento_id=alojamiento_id)
+            return redirect('alquileres:list_alojamientos_propietario', propietario_id=alojamiento.propietario.id)
         else:
             messages.error(request, "Hubo un error al actualizar el alojamiento.")
     else:
-        form = AlojamientoForm(instance=alojamiento)
+        form = EditAlojamientoForm(instance=alojamiento)
 
     return render(request, 'edit_alojamiento.html', {'form': form, 'alojamiento': alojamiento})
 
@@ -640,16 +654,3 @@ def user_profile(request):
         form = UserEditForm(instance=request.user, user=request.user)
 
     return render(request, 'user_profile.html', {'form': form})
-
-def edit_alojamiento(request, alojamiento_id):
-    alojamiento = get_object_or_404(Alojamiento, id=alojamiento_id)
-
-    if request.method == 'POST':
-        form = EditAlojamientoForm(request.POST, request.FILES, instance=alojamiento)
-        if form.is_valid():
-            form.save()
-            return redirect('alquileres:edit_alojamiento', alojamiento_id=alojamiento.id)
-    else:
-        form = EditAlojamientoForm(instance=alojamiento)
-
-    return render(request, 'show_alojamiento.html', {'form': form, 'alojamiento': alojamiento})
