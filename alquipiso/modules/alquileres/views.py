@@ -222,7 +222,7 @@ def register(request):
             # Verificar si el correo ya está registrado
             if User.objects.filter(email=email).exists():
                 messages.error(request, 'El correo electrónico ya está registrado.')
-                return redirect('alquileres:register')
+                return redirect('alquileres:login')
 
             # Crear un usuario base
             user = User.objects.create_user(username=email, email=email, password=password)
@@ -241,6 +241,8 @@ def register(request):
 
             # Redirigir a la página de inicio o a donde quieras
             return redirect('index')
+        else:
+            messages.error(request, 'Las contraseñas no coinciden.')
     else:
         form = UserRegistrationForm()
 
@@ -294,11 +296,16 @@ def create_alojamiento(request):
             # Asignar el propietario actual al alojamiento
             alojamiento.propietario = request.user.propietario
             alojamiento.save()
-            return redirect('alquileres:list_alojamientos_propietario', propietario_id=request.user.propietario.id )  # Redirigir a la página de propiedades del propietario
+            # Redirigir a la página de propiedades del propietario
+            return redirect('alquileres:list_alojamientos_propietario', propietario_id=request.user.propietario.id)
+        else:
+            # Si el formulario no es válido, volvemos a renderizar la página con los errores
+            return render(request, 'create_alojamiento.html', {'form': form})
     else:
         form = AlojamientoForm()
 
     return render(request, 'create_alojamiento.html', {'form': form})
+
 
 def create_reserva(request, alojamiento_id):
     # Obtener el alojamiento de la base de datos
@@ -646,10 +653,21 @@ def validar_fechas_disponibles(fecha_entrada, fecha_salida, ciudad):
 @login_required
 def user_profile(request):
     if request.method == 'POST':
-        form = UserEditForm(request.POST, instance=request.user, user=request.user)
+        form = UserEditForm(request.POST, request.FILES, instance=request.user, user=request.user)
         if form.is_valid():
             form.save()
-            return redirect('alquileres:user_profile')
+            
+            # Actualizar el usuario en la sesión
+            user = User.objects.get(pk=request.user.pk)
+            request.user.email = user.email
+            request.user.username = user.username
+            
+            messages.success(request, "Tu perfil ha sido actualizado.")
+            
+            # Crear una nueva instancia del formulario con los datos actualizados
+            form = UserEditForm(instance=request.user, user=request.user)
+        else:
+            messages.error(request, "Hubo un error al actualizar tu perfil.")
     else:
         form = UserEditForm(instance=request.user, user=request.user)
 
