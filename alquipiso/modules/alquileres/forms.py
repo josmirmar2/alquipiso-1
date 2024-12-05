@@ -190,7 +190,8 @@ class UserEditForm(forms.ModelForm):
 
         new_email = self.cleaned_data.get('email')
         if new_email and new_email != user.email:
-            user.username = new_email
+            user.email = new_email  # Cambiar el 'email'
+            user.username = new_email  # Cambiar también el 'username'
 
         # Cambiar la contraseña si se proporciona una nueva
         new_password = self.cleaned_data.get('new_password')
