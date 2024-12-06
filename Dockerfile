@@ -1,23 +1,20 @@
-# Usar una imagen base de Python
+# Usar una imagen oficial de Python como base
 FROM python:3.12-slim
 
-# Establecer el directorio de trabajo dentro del contenedor
-WORKDIR /app
+# Configurar el directorio de trabajo en el contenedor
+WORKDIR /alquipiso/alquipiso
 
-# Copiar el archivo requirements.txt al contenedor
-COPY requirements.txt /app/
+# Copiar el archivo de requerimientos al contenedor
+COPY requirements.txt /alquipiso/alquipiso/
 
-# Instalar las dependencias
+# Instalar las dependencias del proyecto
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar todo el proyecto al contenedor
-COPY . /app/
+# Copiar el resto de los archivos del proyecto
+COPY . /alquipiso/
 
-# Establecer el directorio de trabajo para que Django use el archivo settings.py correctamente
-ENV PYTHONPATH=/app/alquipiso
-
-# Exponer el puerto en el que Django estará corriendo
+# Exponer el puerto en el que corre Django (puerto 8000 por defecto)
 EXPOSE 8000
 
-# Comando para ejecutar el servidor de desarrollo de Django
+# Ejecutar las migraciones y correr el servidor de Django cuando se inicie el contenedor
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

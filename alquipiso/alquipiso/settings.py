@@ -26,16 +26,11 @@ SECRET_KEY = 'django-insecure-(!*d%n-f(9+kb6crztc+4yo++kyc*0^0l@-6uxx5zhnq1zn+pg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',       # Permite localhost
-    'localhost',       # También localhost
-    '.pythonanywhere.com',  # Dominio público de ngrok
-
-]
+ALLOWED_HOSTS = ['*']
 
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 
 
@@ -157,3 +152,9 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'alejandronb01@gmail.com'  
 EMAIL_HOST_PASSWORD = 'vaby pfwy kepf czvw'  
 
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',    # Asegúrate de que el puerto coincida con el puerto donde tu contenedor está ejecutándose
+    'http://127.0.0.1:8000',
+    'http://0.0.0.0:8000',     # Si usas '0.0.0.0' para exponer el contenedor
+]
